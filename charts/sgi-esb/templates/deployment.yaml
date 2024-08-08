@@ -1,0 +1,95 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "sgi-esb.fullname" . }}
+  labels:
+    {{- include "sgi-esb.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "sgi-esb.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- if .Values.annotations.enabled }}
+      annotations:
+        rollme: {{ randAlphaNum 5 | quote }}
+        {{- with .Values.annotations.podAnnotations }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- end }}  
+      labels:
+        {{- include "sgi-esb.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+      - name: {{ .Chart.Name }}
+        securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+        image: "{{ required "An image.repository value must be specified" .Values.image.repository }}:{{ required "An image.tag value must be specified" .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        env:
+          - name: SGI_ESB_AUTH_SERVER_REALM_ID
+            value: {{ .Values.auth.server.realm.id | quote }}
+          - name: SGI_ESB_AUTH_SERVER_URL
+            value: {{ .Values.auth.server.url | quote }}
+          - name: SGI_ESB_SGDOC_SERVICE_URL
+            value: {{ .Values.sgdoc.service.url | quote }}
+          - name: SGI_ESB_SGE_SERVICE_URL
+            value: {{ .Values.sge.service.url | quote }}
+          - name: SGI_ESB_SGE_API_KEY
+            value: {{ .Values.sge.service.key | quote }}
+          - name: SGI_ESB_SGP_SERVICE_URL
+            value: {{ .Values.sgp.service.url | quote }}
+          - name: SGI_ESB_SGP_API_KEY
+            value: {{ .Values.sgp.service.key | quote }}
+          - name: SGI_ESB_SGEMP_SERVICE_URL
+            value: {{ .Values.sgemp.service.url | quote }}
+          - name: SGI_ESB_SGEMP_API_KEY
+            value: {{ .Values.sgemp.service.key | quote }}
+          - name: SGI_ESB_SGO_SERVICE_URL
+            value: {{ .Values.sgo.service.url | quote }}
+          - name: SGI_ESB_SGO_API_KEY
+            value: {{ .Values.sgo.service.key | quote }}
+          - name: SGI_ESB_SGO_STANDALONE_SERVICE_URL
+            value: {{ .Values.sgo.service.standalone | quote }}
+          - name: SGI_ESB_SGEPII_SERVICE_URL
+            value: {{ .Values.sgepii.service.url | quote }}
+          - name: SGI_ESB_SGEPII_API_KEY
+            value: {{ .Values.sgepii.service.key | quote }}
+          - name: SGI_ESB_SGIPII_SERVICE_URL
+            value: {{ .Values.sgepii.service.piiUrl | quote }}
+          - name: SGI_ESB_SGICSP_SERVICE_URL
+            value: {{ .Values.sgi.service.cspUrl | quote }}
+          - name: SGI_ESB_SGIEER_SERVICE_URL
+            value: {{ .Values.sgi.service.eerUrl | quote }}
+          - name: SGI_ESB_SGIPRC_SERVICE_URL
+            value: {{ .Values.sgi.service.prcUrl | quote }}
+          - name: SGI_ESB_SGIUSR_SERVICE_URL
+            value: {{ .Values.sgi.service.usrUrl | quote }}
+          - name: SGI_ESB_CVN_SERVICE_URL
+            value: {{ .Values.cvn.service.url | quote }}
+          {{- if .Values.extraEnvVariables }}
+            {{- toYaml .Values.extraEnvVariables | nindent 10 }}
+          {{- end }}
+        ports:
+          - containerPort: 8290
+        resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

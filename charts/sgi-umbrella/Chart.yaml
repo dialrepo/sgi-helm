@@ -1,0 +1,128 @@
+apiVersion: v2
+name: sgi-umbrella
+description: An umbrella chart for deploying all SGI services.
+
+# A chart can be either an 'application' or a 'library' chart.
+#
+# Application charts are a collection of templates that can be packaged into versioned archives
+# to be deployed.
+#
+# Library charts provide useful utilities or functions for the chart developer. They're included as
+# a dependency of application charts to inject those utilities and functions into the rendering
+# pipeline. Library charts do not define any templates and therefore cannot be deployed.
+type: application
+
+# This is the chart version. This version number should be incremented each time you make changes
+# to the chart and its templates, including the app version.
+# Versions are expected to follow Semantic Versioning (https://semver.org/)
+version: 0.1.46
+
+# This is the version number of the application being deployed. This version number should be
+# incremented each time you make changes to the application. Versions are not expected to
+# follow Semantic Versioning. They should reflect the version the application is using.
+# It is recommended to use it with quotes.
+appVersion: "umbrella"
+
+# use local dependencies
+dependencies:
+  - name: sgi-webapp
+    version: 0.1.4
+    repository: "file://../sgi-webapp"
+
+  - name: sgi-service
+    version: 0.1.8
+    repository: "file://../sgi-service"
+    alias: sgi-usr-service
+
+  - name: sgi-service
+    version: 0.1.8
+    repository: "file://../sgi-service"
+    alias: sgi-eer-service
+
+  - name: sgi-service
+    version: 0.1.8
+    repository: "file://../sgi-service"
+    alias: sgi-eti-service
+
+  - name: sgi-service
+    version: 0.1.8
+    repository: "file://../sgi-service"
+    alias: sgi-csp-service
+
+  - name: sgi-service
+    version: 0.1.8
+    repository: "file://../sgi-service"
+    alias: sgi-pii-service
+
+  - name: sgi-service
+    version: 0.1.8
+    repository: "file://../sgi-service"
+    alias: sgi-rel-service
+
+  - name: sgi-service
+    version: 0.1.8
+    repository: "file://../sgi-service"
+    alias: sgi-tp-service
+
+  - name: sgi-service
+    version: 0.1.8
+    repository: "file://../sgi-service"
+    alias: sgi-rep-service
+
+  - name: sgi-service
+    version: 0.1.8
+    repository: "file://../sgi-service"
+    alias: sgi-com-service
+
+  - name: sgi-service
+    version: 0.1.8
+    repository: "file://../sgi-service"
+    alias: sgi-cnf-service
+
+  - name: sgi-service
+    version: 0.1.8
+    repository: "file://../sgi-service"
+    alias: sgi-prc-service
+
+  - name: sgi-keycloak
+    version: 0.1.17
+    repository: "file://../sgi-keycloak"
+
+  - name: sgi-esb
+    version: 0.1.25
+    repository: "file://../sgi-esb"
+
+  - name: sgi-esb-external
+    version: 0.2.3
+    repository: "file://../sgi-esb-external"
+    alias: sgp-service
+    condition: sgp.enabled
+
+  - name: sgi-esb-external
+    version: 0.2.3
+    repository: "file://../sgi-esb-external"
+    alias: sgemp-service
+    condition: sgemp.enabled
+
+  - name: sgi-esb-external
+    version: 0.2.3
+    repository: "file://../sgi-esb-external"
+    alias: sgo-service
+    condition: sgo.enabled
+
+  - name: sgi-esb-external
+    version: 0.2.3
+    repository: "file://../sgi-esb-external"
+    alias: sge-service
+    condition: sge.enabled
+
+  - name: sgi-esb-external
+    version: 0.2.3
+    repository: "file://../sgi-esb-external"
+    alias: sgdoc-service
+    condition: sgdoc.enabled
+
+  - name: postgresql
+    version: "12.1.9"
+    repository: "@bitnami"
+    condition: postgresql.enabled

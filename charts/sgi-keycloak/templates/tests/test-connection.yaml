@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "sgi-keycloak.fullname" . }}-test-connection"
+  labels:
+    {{- include "sgi-keycloak.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      imagePullPolicy: IfNotPresent
+      command: ['wget']
+      args: ['{{ include "sgi-keycloak.fullname" . }}:{{ .Values.service.port }}']
+  restartPolicy: Never

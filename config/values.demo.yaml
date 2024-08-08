@@ -1,0 +1,1043 @@
+# Configuration for the DEMO Environment of the SGI application
+
+## WEB deployment
+sgi-webapp:
+
+  image:
+    # image.repository is required
+    repository: h3rcul3scru3/sgi-webapp
+    pullPolicy: IfNotPresent
+    # image.tag is required
+    tag: 0.7.0
+
+  ## Should be enabled and set the correct hostname to be accesible from outside
+  ingress:
+    enabled: true
+    className: nginx
+    # annotations:
+    #   kubernetes.io/ingress.class: nginx
+    spec:
+      ingressClassName: nginx
+    hosts:
+      - host: demo.hercules-sgi.local
+        paths:
+          - path: /
+
+## USR Service
+sgi-usr-service:
+
+  image:
+    # image.repository is required
+    repository: h3rcul3scru3/usr-service
+    pullPolicy: IfNotPresent
+    # image.tag is required
+    tag: 0.3.0
+
+
+  spring:
+    ## Endpoint of Signing certificate of JWT tokens. Change only the hostname or protocol.
+    securityOauth2ResourceserverJwtJwkSetUri: http://sgi-sgi-keycloak/auth/realms/sgi/protocol/openid-connect/certs
+    ## Standard discovery endpoint for Oauth2. Change only the hostname or protocol.
+    securityOauth2ClientProviderKeycloackIssuerUri: http://sgi-sgi-keycloak/auth/realms/sgi
+    ## JDBC conection to database
+    datasourceUrl: jdbc:postgresql://sgi-postgresql:5432/db
+    ## Valid values: dev or pro
+    ## With dev, sample data will be loaded
+    liquibaseContexts: dev
+
+  ## Aditional Enviroment Variables (See Spring Boot Documentation) for additional supported variables
+  ## Values can be provided from secrets, see https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-environment-variables
+  extraEnvVariables:
+    - name: SPRING_DATASOURCE_INITIALIZATION-MODE
+      value: ALWAYS
+    - name: SPRING_DATASOURCE_DRIVER-CLASS-NAME
+      value: org.postgresql.Driver
+    - name: SPRING_DATASOURCE_USERNAME
+      value: usr
+    - name: SPRING_DATASOURCE_PASSWORD
+      value: usr
+    - name: SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT
+      value: org.hibernate.dialect.PostgreSQL95Dialect
+
+  ## Should be enabled and set the correct hostname to be accesible from outside
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      nginx.ingress.kubernetes.io/rewrite-target: /$2
+    hosts:
+      - host: demo.hercules-sgi.local
+        paths:
+          - path: /api/usr(/|$)(.*)
+
+## EER Service
+sgi-eer-service:
+
+  image:
+    # image.repository is required
+    repository: h3rcul3scru3/eer-service
+    pullPolicy: IfNotPresent
+    # image.tag is required
+    tag: 0.2.0
+
+  spring:
+    ## Endpoint of Signing certificate of JWT tokens. Change only the hostname or protocol.
+    securityOauth2ResourceserverJwtJwkSetUri: http://sgi-sgi-keycloak/auth/realms/sgi/protocol/openid-connect/certs
+    ## Standard discovery endpoint for Oauth2. Change only the hostname or protocol.
+    securityOauth2ClientProviderKeycloackIssuerUri: http://sgi-sgi-keycloak/auth/realms/sgi
+    ## JDBC conection to database
+    datasourceUrl: jdbc:postgresql://sgi-postgresql:5432/db
+    ## Valid values: dev or pro
+    ## With dev, sample data will be loaded
+    liquibaseContexts: dev
+
+  ## Aditional Enviroment Variables (See Spring Boot Documentation) for additional supported variables
+  ## Values can be provided from secrets, see https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-environment-variables
+  extraEnvVariables:
+    ## Datasource configuration
+    - name: SPRING_DATASOURCE_INITIALIZATION-MODE
+      value: ALWAYS
+    - name: SPRING_DATASOURCE_DRIVER-CLASS-NAME
+      value: org.postgresql.Driver
+    - name: SPRING_DATASOURCE_USERNAME
+      value: eer
+    - name: SPRING_DATASOURCE_PASSWORD
+      value: eer
+    - name: SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT
+      value: org.hibernate.dialect.PostgreSQL95Dialect
+
+  ## Should be enabled and set the correct hostname to be accesible from outside
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      nginx.ingress.kubernetes.io/rewrite-target: /$2
+    hosts:
+      - host: demo.hercules-sgi.local
+        paths:
+          - path: /api/eer(/|$)(.*)
+
+## ETI Service
+sgi-eti-service:
+
+  image:
+    # image.repository is required
+    repository: h3rcul3scru3/eti-service
+    pullPolicy: IfNotPresent
+    # image.tag is required
+    tag: 0.5.2
+
+
+  spring:
+    ## Endpoint of Signing certificate of JWT tokens. Change only the hostname or protocol.
+    securityOauth2ResourceserverJwtJwkSetUri: http://sgi-sgi-keycloak/auth/realms/sgi/protocol/openid-connect/certs
+    ## Standard discovery endpoint for Oauth2. Change only the hostname or protocol.
+    securityOauth2ClientProviderKeycloackIssuerUri: http://sgi-sgi-keycloak/auth/realms/sgi
+    ## JDBC conection to database
+    datasourceUrl: jdbc:postgresql://sgi-postgresql:5432/db
+    ## Valid values: dev or pro
+    ## With dev, sample data will be loaded
+    liquibaseContexts: dev
+
+  ## Aditional Enviroment Variables (See Spring Boot Documentation) for additional supported variables
+  ## Values can be provided from secrets, see https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-environment-variables
+  extraEnvVariables:
+    ## rep-service base url
+    - name: SGI_REST_API_REP-URL
+      value: "http://sgi-sgi-rep-service"
+    ## ESB sgdoc base url
+    - name: SGI_REST_API_SGDOC-URL
+      value: "http://sgi-sgi-esb/sgdoc"
+    ## ESB sgp base url
+    - name: SGI_REST_API_SGP-URL
+      value: "http://sgi-sgi-esb/sgp"
+    ## com-service base url
+    - name: SGI_REST_API_COM-URL
+      value: "http://sgi-sgi-com-service"
+    ## cnf-service base url
+    - name: SGI_REST_API_CNF-URL
+      value: "http://sgi-sgi-cnf-service"
+    ## external webapp accesible base url
+    - name: SGI_WEB-URL
+      value: "http://demo.hercules-sgi.local"
+    ## Blockchain API base url
+    - name: SGI_BLOCKCHAIN_URL
+      value: "http://blockchain.local"
+    ## Blockchain API password
+    - name: SGI_BLOCKCHAIN_PASSWORD
+      value: "password"
+    ## Datasource configuration
+    - name: SPRING_DATASOURCE_INITIALIZATION-MODE
+      value: ALWAYS
+    - name: SPRING_DATASOURCE_DRIVER-CLASS-NAME
+      value: org.postgresql.Driver
+    - name: SPRING_DATASOURCE_USERNAME
+      value: eti
+    - name: SPRING_DATASOURCE_PASSWORD
+      value: eti
+    - name: SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT
+      value: org.hibernate.dialect.PostgreSQL95Dialect
+
+  ## Should be enabled and set the correct hostname to be accesible from outside
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      nginx.ingress.kubernetes.io/rewrite-target: /$2
+    hosts:
+      - host: demo.hercules-sgi.local
+        paths:
+          - path: /api/eti(/|$)(.*)
+
+## CSP Service
+sgi-csp-service:
+
+  image:
+    # image.repository is required
+    repository: h3rcul3scru3/csp-service
+    pullPolicy: IfNotPresent
+    # image.tag is required
+    tag: 0.6.0
+
+  spring:
+    ## Endpoint of Signing certificate of JWT tokens. Change only the hostname or protocol.
+    securityOauth2ResourceserverJwtJwkSetUri: http://sgi-sgi-keycloak/auth/realms/sgi/protocol/openid-connect/certs
+    ## Standard discovery endpoint for Oauth2. Change only the hostname or protocol.
+    securityOauth2ClientProviderKeycloackIssuerUri: http://sgi-sgi-keycloak/auth/realms/sgi
+    ## JDBC conection to database
+    datasourceUrl: jdbc:postgresql://sgi-postgresql:5432/db
+    ## Valid values: dev or pro
+    ## With dev, sample data will be loaded
+    liquibaseContexts: dev
+
+  ## Aditional Enviroment Variables (See Spring Boot Documentation) for additional supported variables
+  ## Values can be provided from secrets, see https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-environment-variables
+  extraEnvVariables:
+    ## cnf-service base url
+    - name: SGI_REST_API_CNF-URL
+      value: "http://sgi-sgi-cnf-service"
+    ## com-service base url
+    - name: SGI_REST_API_COM-URL
+      value: "http://sgi-sgi-com-service"
+    ## eti-service base url
+    - name: SGI_REST_API_ETI-URL
+      value: "http://sgi-sgi-eti-service"
+    ## rep-service base url
+    - name: SGI_REST_API_REP-URL
+      value: "http://sgi-sgi-rep-service"
+    ## ESB sgdoc base url
+    - name: SGI_REST_API_SGDOC-URL
+      value: "http://sgi-sgi-esb/sgdoc"
+    ## ESB sgp base url
+    - name: SGI_REST_API_SGP-URL
+      value: "http://sgi-sgi-esb/sgp"
+    ## tp-service base url
+    - name: SGI_REST_API_TP-URL
+      value: "http://sgi-sgi-tp-service"
+    ## ESB sgemp base url
+    - name: SGI_REST_API_SGEMP-URL
+      value: "http://sgi-sgi-esb/sgemp"
+    ## external webapp accesible base url
+    - name: SGI_WEB-URL
+      value: "http://demo.hercules-sgi.local"
+    ## Datasource configuration
+    - name: SPRING_DATASOURCE_INITIALIZATION-MODE
+      value: ALWAYS
+    - name: SPRING_DATASOURCE_DRIVER-CLASS-NAME
+      value: org.postgresql.Driver
+    - name: SPRING_DATASOURCE_USERNAME
+      value: csp
+    - name: SPRING_DATASOURCE_PASSWORD
+      value: csp
+    - name: SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT
+      value: org.hibernate.dialect.PostgreSQL95Dialect
+
+  ## Should be enabled and set the correct hostname to be accesible from outside
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      nginx.ingress.kubernetes.io/rewrite-target: /$2
+    hosts:
+      - host: demo.hercules-sgi.local
+        paths:
+          - path: /api/csp(/|$)(.*)
+
+## PII Service
+sgi-pii-service:
+
+  image:
+    # image.repository is required
+    repository: h3rcul3scru3/pii-service
+    pullPolicy: IfNotPresent
+    # image.tag is required
+    tag: 0.4.0
+
+  spring:
+    ## Endpoint of Signing certificate of JWT tokens. Change only the hostname or protocol.
+    securityOauth2ResourceserverJwtJwkSetUri: http://sgi-sgi-keycloak/auth/realms/sgi/protocol/openid-connect/certs
+    ## Standard discovery endpoint for Oauth2. Change only the hostname or protocol.
+    securityOauth2ClientProviderKeycloackIssuerUri: http://sgi-sgi-keycloak/auth/realms/sgi
+    ## JDBC conection to database
+    datasourceUrl: jdbc:postgresql://sgi-postgresql:5432/db
+    ## Valid values: dev or pro
+    ## With dev, sample data will be loaded
+    liquibaseContexts: dev
+
+  ## Aditional Enviroment Variables (See Spring Boot Documentation) for additional supported variables
+  ## Values can be provided from secrets, see https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-environment-variables
+  extraEnvVariables:
+    ## cnf-service base url
+    - name: SGI_REST_API_CNF-URL
+      value: "http://sgi-sgi-cnf-service"
+    ## com-service base url
+    - name: SGI_REST_API_COM-URL
+      value: "http://sgi-sgi-com-service"
+    ## tp-service base url
+    - name: SGI_REST_API_TP-URL
+      value: "http://sgi-sgi-tp-service"
+    ## Datasource configuration
+    - name: SPRING_DATASOURCE_INITIALIZATION-MODE
+      value: ALWAYS
+    - name: SPRING_DATASOURCE_DRIVER-CLASS-NAME
+      value: org.postgresql.Driver
+    - name: SPRING_DATASOURCE_USERNAME
+      value: pii
+    - name: SPRING_DATASOURCE_PASSWORD
+      value: pii
+    - name: SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT
+      value: org.hibernate.dialect.PostgreSQL95Dialect
+
+  ## Should be enabled and set the correct hostname to be accesible from outside
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      nginx.ingress.kubernetes.io/rewrite-target: /$2
+    hosts:
+      - host: demo.hercules-sgi.local
+        paths:
+          - path: /api/pii(/|$)(.*)
+
+## REL Service
+sgi-rel-service:
+
+  image:
+    # image.repository is required
+    repository: h3rcul3scru3/rel-service
+    pullPolicy: IfNotPresent
+    # image.tag is required
+    tag: 0.2.0
+  spring:
+    ## Endpoint of Signing certificate of JWT tokens. Change only the hostname or protocol.
+    securityOauth2ResourceserverJwtJwkSetUri: http://sgi-sgi-keycloak/auth/realms/sgi/protocol/openid-connect/certs
+    ## Standard discovery endpoint for Oauth2. Change only the hostname or protocol.
+    securityOauth2ClientProviderKeycloackIssuerUri: http://sgi-sgi-keycloak/auth/realms/sgi
+    ## JDBC conection to database
+    datasourceUrl: jdbc:postgresql://sgi-postgresql:5432/db
+    ## Valid values: dev or pro
+    ## With dev, sample data will be loaded
+    liquibaseContexts: dev
+
+  ## Aditional Enviroment Variables (See Spring Boot Documentation) for additional supported variables
+  ## Values can be provided from secrets, see https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-environment-variables
+  extraEnvVariables:
+    ## Datasource configuration
+    - name: SPRING_DATASOURCE_INITIALIZATION-MODE
+      value: ALWAYS
+    - name: SPRING_DATASOURCE_DRIVER-CLASS-NAME
+      value: org.postgresql.Driver
+    - name: SPRING_DATASOURCE_USERNAME
+      value: rel
+    - name: SPRING_DATASOURCE_PASSWORD
+      value: rel
+    - name: SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT
+      value: org.hibernate.dialect.PostgreSQL95Dialect
+
+  ## Should be enabled and set the correct hostname to be accesible from outside
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      nginx.ingress.kubernetes.io/rewrite-target: /$2
+    hosts:
+      - host: demo.hercules-sgi.local
+        paths:
+          - path: /api/rel(/|$)(.*)
+
+## TP Service
+sgi-tp-service:
+
+  image:
+    # image.repository is required
+    repository: h3rcul3scru3/tp-service
+    pullPolicy: IfNotPresent
+    # image.tag is required
+    tag: 0.2.0
+  spring:
+    ## Endpoint of Signing certificate of JWT tokens. Change only the hostname or protocol.
+    securityOauth2ResourceserverJwtJwkSetUri: http://sgi-sgi-keycloak/auth/realms/sgi/protocol/openid-connect/certs
+    ## Standard discovery endpoint for Oauth2. Change only the hostname or protocol.
+    securityOauth2ClientProviderKeycloackIssuerUri: http://sgi-sgi-keycloak/auth/realms/sgi
+    ## JDBC conection to database
+    datasourceUrl: jdbc:postgresql://sgi-postgresql:5432/db
+    ## Valid values: dev or pro
+    ## With dev, sample data will be loaded
+    liquibaseContexts: dev
+
+  ## Aditional Enviroment Variables (See Spring Boot Documentation) for additional supported variables
+  ## Values can be provided from secrets, see https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-environment-variables
+  extraEnvVariables:
+    ## Endpoint for taking JWT tokens. Change only the hostname or protocol.
+    - name: SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_TOKEN-URI
+      value: http://sgi-sgi-keycloak/auth/realms/sgi/protocol/openid-connect/token
+    ## com-service base url
+    - name: SGI_REST_API_COM-URL
+      value: "http://sgi-sgi-com-service"
+    ## csp-service base url
+    - name: SGI_REST_API_CSP-URL
+      value: "http://sgi-sgi-csp-service"
+    ## eti-service base url
+    - name: SGI_REST_API_ETI-URL
+      value: "http://sgi-sgi-eti-service"
+    ## pii-service base url
+    - name: SGI_REST_API_PII-URL
+      value: "http://sgi-sgi-pii-service"
+    ## prc-service base url
+    - name: SGI_REST_API_PRC-URL
+      value: "http://sgi-sgi-prc-service"
+    ## rel-service base url
+    - name: SGI_REST_API_REL-URL
+      value: "http://sgi-sgi-rel-service"
+    ## rep-service base url
+    - name: SGI_REST_API_REP-URL
+      value: "http://sgi-sgi-rep-service"
+    ## usr-service base url
+    - name: SGI_REST_API_USR-URL
+      value: "http://sgi-sgi-usr-service"
+    ## Datasource configuration
+    - name: SPRING_DATASOURCE_INITIALIZATION-MODE
+      value: ALWAYS
+    - name: SPRING_DATASOURCE_DRIVER-CLASS-NAME
+      value: org.postgresql.Driver
+    - name: SPRING_DATASOURCE_USERNAME
+      value: tp
+    - name: SPRING_DATASOURCE_PASSWORD
+      value: tp
+    - name: SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT
+      value: org.hibernate.dialect.PostgreSQL95Dialect
+
+  ## Should be enabled and set the correct hostname to be accesible from outside
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      nginx.ingress.kubernetes.io/rewrite-target: /$2
+    hosts:
+      - host: demo.hercules-sgi.local
+        paths:
+          - path: /api/tp(/|$)(.*)
+
+## REP Service
+sgi-rep-service:
+
+  image:
+    # image.repository is required
+    repository: h3rcul3scru3/rep-service
+    pullPolicy: IfNotPresent
+    # image.tag is required
+    tag: 0.5.0
+
+  spring:
+    ## Endpoint of Signing certificate of JWT tokens. Change only the hostname or protocol.
+    securityOauth2ResourceserverJwtJwkSetUri: http://sgi-sgi-keycloak/auth/realms/sgi/protocol/openid-connect/certs
+    ## Standard discovery endpoint for Oauth2. Change only the hostname or protocol.
+    securityOauth2ClientProviderKeycloackIssuerUri: http://sgi-sgi-keycloak/auth/realms/sgi
+    ## JDBC conection to database
+    datasourceUrl: jdbc:postgresql://sgi-postgresql:5432/db
+    ## Valid values: dev or pro
+    ## With dev, sample data will be loaded
+    liquibaseContexts: dev
+
+  ## Aditional Enviroment Variables (See Spring Boot Documentation) for additional supported variables
+  ## Values can be provided from secrets, see https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-environment-variables
+  extraEnvVariables:
+    ## cnf-service base url
+    - name: SGI_REST_API_CNF-URL
+      value: "http://sgi-sgi-cnf-service"
+    ## com-service base url
+    - name: SGI_REST_API_COM-URL
+      value: "http://sgi-sgi-com-service"
+    ## csp-service base url
+    - name: SGI_REST_API_CSP-URL
+      value: "http://sgi-sgi-csp-service"
+    ## eti-service base url
+    - name: SGI_REST_API_ETI-URL
+      value: "http://sgi-sgi-eti-service"
+    ## pii-service base url
+    - name: SGI_REST_API_PII-URL
+      value: "http://sgi-sgi-pii-service"
+    ## prc-service base url
+    - name: SGI_REST_API_PRC-URL
+      value: "http://sgi-sgi-prc-service"
+    ## rel-service base url
+    - name: SGI_REST_API_REL-URL
+      value: "http://sgi-sgi-rel-service"
+    ## ESB sgemp base url
+    - name: SGI_REST_API_SGEMP-URL
+      value: "http://sgi-sgi-esb/sgemp"
+    ## ESB sgp base url
+    - name: SGI_REST_API_SGP-URL
+      value: "http://sgi-sgi-esb/sgp"
+    ## tp-service base url
+    - name: SGI_REST_API_TP-URL
+      value: "http://sgi-sgi-tp-service"
+    ## usr-service base url
+    - name: SGI_REST_API_USR-URL
+      value: "http://sgi-sgi-usr-service"
+    ## Datasource configuration
+    - name: SPRING_DATASOURCE_INITIALIZATION-MODE
+      value: ALWAYS
+    - name: SPRING_DATASOURCE_DRIVER-CLASS-NAME
+      value: org.postgresql.Driver
+    - name: SPRING_DATASOURCE_USERNAME
+      value: rep
+    - name: SPRING_DATASOURCE_PASSWORD
+      value: rep
+    - name: SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT
+      value: org.hibernate.dialect.PostgreSQL95Dialect
+
+  ## Should be enabled and set the correct hostname to be accesible from outside
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      nginx.ingress.kubernetes.io/rewrite-target: /$2
+    hosts:
+      - host: demo.hercules-sgi.local
+        paths:
+          - path: /api/rep(/|$)(.*)
+
+## COM Service
+sgi-com-service:
+
+  image:
+    # image.repository is required
+    repository: h3rcul3scru3/com-service
+    pullPolicy: IfNotPresent
+    # image.tag is required
+    tag: 0.4.0
+
+  spring:
+    ## Endpoint of Signing certificate of JWT tokens. Change only the hostname or protocol.
+    securityOauth2ResourceserverJwtJwkSetUri: http://sgi-sgi-keycloak/auth/realms/sgi/protocol/openid-connect/certs
+    ## Standard discovery endpoint for Oauth2. Change only the hostname or protocol.
+    securityOauth2ClientProviderKeycloackIssuerUri: http://sgi-sgi-keycloak/auth/realms/sgi
+    ## JDBC conection to database
+    datasourceUrl: jdbc:postgresql://sgi-postgresql:5432/db
+    ## Valid values: dev or pro
+    ## With dev, sample data will be loaded
+    liquibaseContexts: dev
+
+  ## Aditional Enviroment Variables (See Spring Boot Documentation) for additional supported variables
+  ## Values can be provided from secrets, see https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-environment-variables
+  extraEnvVariables:
+    ## Send email host
+    - name: SPRING_MAIL_HOST
+      value: "smpt.email.com"
+    ## Send email host port
+    - name: SPRING_MAIL_PORT
+      value: "465"
+    ## Send email username
+    - name: SPRING_MAIL_USERNAME
+      value: "info@hercules.org"
+    ## Send email password
+    - name: SPRING_MAIL_PASSWORD
+      value: "password"
+    ## Disable the email sending
+    - name: SGI_DISABLE-EMAIL-SEND
+      value: "true"
+    ## If set all emails are sent to this instead of real recipient list
+    - name: SGI_FAKE-EMAIL-RECIPIENTS
+      value: ""
+    ## Endpoint for taking JWT tokens. Change only the hostname or protocol.
+    - name: SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_TOKEN-URI
+      value: http://sgi-sgi-keycloak/auth/realms/sgi/protocol/openid-connect/token
+    ## csp-service base url
+    - name: SGI_REST_API_CSP-URL
+      value: "http://sgi-sgi-csp-service"
+    ## eti-service base url
+    - name: SGI_REST_API_ETI-URL
+      value: "http://sgi-sgi-eti-service"
+    ## pii-service base url
+    - name: SGI_REST_API_PII-URL
+      value: "http://sgi-sgi-pii-service"
+    ## rel-service base url
+    - name: SGI_REST_API_REL-URL
+      value: "http://sgi-sgi-rel-service"
+    ## rep-service base url
+    - name: SGI_REST_API_REP-URL
+      value: "http://sgi-sgi-rep-service"
+    ## ESB sgdoc base url
+    - name: SGI_REST_API_SGDOC-URL
+      value: "http://sgi-sgi-esb/sgdoc"
+    ## tp-service base url
+    - name: SGI_REST_API_TP-URL
+      value: "http://sgi-sgi-tp-service"
+    ## usr-service base url
+    - name: SGI_REST_API_USR-URL
+      value: "http://sgi-sgi-usr-service"
+    ## Datasource configuration
+    - name: SPRING_DATASOURCE_INITIALIZATION-MODE
+      value: ALWAYS
+    - name: SPRING_DATASOURCE_DRIVER-CLASS-NAME
+      value: org.postgresql.Driver
+    - name: SPRING_DATASOURCE_USERNAME
+      value: com
+    - name: SPRING_DATASOURCE_PASSWORD
+      value: com
+    - name: SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT
+      value: org.hibernate.dialect.PostgreSQL95Dialect
+
+  ## Should be enabled and set the correct hostname to be accesible from outside
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      nginx.ingress.kubernetes.io/rewrite-target: /$2
+    hosts:
+      - host: demo.hercules-sgi.local
+        paths:
+          - path: /api/com(/|$)(.*)
+
+## CNF Service
+sgi-cnf-service:
+
+  image:
+    # image.repository is required
+    repository: h3rcul3scru3/cnf-service
+    pullPolicy: IfNotPresent
+    # image.tag is required
+    tag: 0.5.0
+
+  spring:
+    ## Endpoint of Signing certificate of JWT tokens. Change only the hostname or protocol.
+    securityOauth2ResourceserverJwtJwkSetUri: http://sgi-sgi-keycloak/auth/realms/sgi/protocol/openid-connect/certs
+    ## Standard discovery endpoint for Oauth2. Change only the hostname or protocol.
+    securityOauth2ClientProviderKeycloackIssuerUri: http://sgi-sgi-keycloak/auth/realms/sgi
+    ## JDBC conection to database
+    datasourceUrl: jdbc:postgresql://sgi-postgresql:5432/db
+    ## Valid values: dev or pro
+    ## With dev, sample data will be loaded
+    liquibaseContexts: dev
+
+  ## Aditional Enviroment Variables (See Spring Boot Documentation) for additional supported variables
+  ## Values can be provided from secrets, see https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-environment-variables
+  extraEnvVariables:
+    ## Datasource configuration
+    - name: SPRING_DATASOURCE_INITIALIZATION-MODE
+      value: ALWAYS
+    - name: SPRING_DATASOURCE_DRIVER-CLASS-NAME
+      value: org.postgresql.Driver
+    - name: SPRING_DATASOURCE_USERNAME
+      value: cnf
+    - name: SPRING_DATASOURCE_PASSWORD
+      value: cnf
+    - name: SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT
+      value: org.hibernate.dialect.PostgreSQL95Dialect
+
+  ## Should be enabled and set the correct hostname to be accesible from outside
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      nginx.ingress.kubernetes.io/rewrite-target: /$2
+    hosts:
+      - host: demo.hercules-sgi.local
+        paths:
+          - path: /api/cnf(/|$)(.*)
+
+## PRC Service
+sgi-prc-service:
+
+  image:
+    # image.repository is required
+    repository: h3rcul3scru3/prc-service
+    pullPolicy: IfNotPresent
+    # image.tag is required
+    tag: 0.3.0
+
+  spring:
+    ## Endpoint of Signing certificate of JWT tokens. Change only the hostname or protocol.
+    securityOauth2ResourceserverJwtJwkSetUri: http://sgi-sgi-keycloak/auth/realms/sgi/protocol/openid-connect/certs
+    ## Standard discovery endpoint for Oauth2. Change only the hostname or protocol.
+    securityOauth2ClientProviderKeycloackIssuerUri: http://sgi-sgi-keycloak/auth/realms/sgi
+    ## JDBC conection to database
+    datasourceUrl: jdbc:postgresql://sgi-postgresql:5432/db
+    ## Valid values: dev or pro
+    ## With dev, sample data will be loaded
+    liquibaseContexts: dev
+
+  ## Aditional Enviroment Variables (See Spring Boot Documentation) for additional supported variables
+  ## Values can be provided from secrets, see https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-environment-variables
+  extraEnvVariables:
+    ## cnf-service base url
+    - name: SGI_REST_API_CNF-URL
+      value: "http://sgi-sgi-cnf-service"
+    ## com-service base url
+    - name: SGI_REST_API_COM-URL
+      value: "http://sgi-sgi-com-service"
+    ## csp-service base url
+    - name: SGI_REST_API_CSP-URL
+      value: "http://sgi-sgi-csp-service"
+    ## pii-service base url
+    - name: SGI_REST_API_PII-URL
+      value: "http://sgi-sgi-pii-service"
+    ## rel-service base url
+    - name: SGI_REST_API_REL-URL
+      value: "http://sgi-sgi-rel-service"
+    ## rep-service base url
+    - name: SGI_REST_API_REP-URL
+      value: "http://sgi-sgi-rep-service"
+    ## ESB sgo base url
+    - name: SGI_REST_API_SGO-URL
+      value: "http://sgi-sgi-esb/sgo"
+    ## ESB sgepii base url
+    - name: SGI_REST_API_SGEPII-URL
+      value: "http://sgi-sgi-esb/sgepii"
+    ## ESB sgp base url
+    - name: SGI_REST_API_SGP-URL
+      value: "http://sgi-sgi-esb/sgp"
+    ## tp-service base url
+    - name: SGI_REST_API_TP-URL
+      value: "http://sgi-sgi-tp-service"
+    ## Datasource configuration
+    - name: SPRING_DATASOURCE_INITIALIZATION-MODE
+      value: ALWAYS
+    - name: SPRING_DATASOURCE_DRIVER-CLASS-NAME
+      value: org.postgresql.Driver
+    - name: SPRING_DATASOURCE_USERNAME
+      value: prc
+    - name: SPRING_DATASOURCE_PASSWORD
+      value: prc
+    - name: SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT
+      value: org.hibernate.dialect.PostgreSQL95Dialect
+
+  ## Should be enabled and set the correct hostname to be accesible from outside
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      nginx.ingress.kubernetes.io/rewrite-target: /$2
+    hosts:
+      - host: demo.hercules-sgi.local
+        paths:
+          - path: /api/prc(/|$)(.*)
+
+## AUTH Service based on Keycloak
+sgi-keycloak:
+
+  image:
+    # image.repository is required
+    repository: h3rcul3scru3/auth
+    pullPolicy: IfNotPresent
+    # image.tag is required
+    tag: 0.4.0
+
+  settings:
+    # Admin username
+    keycloakUser: "admin"
+    # Admin password
+    keycloakPassword: "password"
+    # Enable running behind a proxy
+    proxyAddressForwarding: "true"
+    # Migration strategy when importing a realm on boot
+    keycloakMigrationStrategy: "IGNORE_EXISTING"
+
+  ## Aditional Enviroment Variables (See Spring Boot Documentation) for additional supported variables
+  ## Values can be provided from secrets, see https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-environment-variables
+  extraEnvVariables:
+    ## Database vendor. Valid values: h2 or postgres or oracle
+    - name: DB_VENDOR
+      value: "postgres"
+    ## Database hostname
+    - name: DB_ADDR
+      value: "sgi-postgresql"
+    ## Database port
+    - name: DB_PORT
+      value: "5432"
+    ## Database name.
+    ## Oracle database should be prefixed with ":" or "/", to connect in SID or Service mode respectively
+    - name: DB_DATABASE
+      value: "db"
+    ## Database schema
+    - name: DB_SCHEMA
+      value: "auth"
+    ## Database username
+    - name: DB_USER
+      value: "auth"
+    ## Database password
+    - name: DB_PASSWORD
+      value: "auth"
+
+  configMap:
+    sgiRealmJson: "config/sgi-realm.json"
+
+  ## Should be enabled and set the correct hostname to be accesible from outside
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: nginx
+    hosts:
+      - host: demo.hercules-sgi.local
+        paths:
+          - path: /auth
+
+## ESB Service
+sgi-esb:
+
+  image:
+    # image.repository is required
+    repository: h3rcul3scru3/esb-wso2-mi
+    pullPolicy: IfNotPresent
+    # image.tag is required
+    tag: 0.5.0-um
+
+  ## Auth validation config
+  auth:
+    server:
+      ## Base url of SGI Auth Service. Change only hostname and protocol.
+      url: http://sgi-sgi-keycloak/auth
+      realm:
+        ## Realm of the auth. Don't change
+        id: sgi
+  ## SGDOC module config
+  sgdoc:
+    service:
+      ## Base url of SGDOC service
+      url: http://sgi-sgdoc-service
+  ## SGP module config
+  sgp:
+    service:
+      ## Base url of SGP service
+      url: https://sgp.university.com/
+      ## Api-Key
+      key: default-key
+  ## SGE module config
+  sge:
+    service:
+      ## Base url of SGE service
+      url: https://sge.university.com/
+      ## Api-Key
+      key: default-key
+  ## SGEMP module config
+  sgemp:
+    service:
+      ## Base url of SGEMP service
+      url: http://sgemp.university.com/
+      ## Api-Key
+      key: default-key
+  ## SGEPII module config
+  sgepii:
+    service:
+      ## Base url of SGEPII service
+      url: http://sge-pii.university.com/
+      ## Api-Key
+      key: default-key
+      ## Base url of PII service
+      piiUrl: http://sgi-sgi-pii-service
+  ## SGO module config
+  sgo:
+    service:
+      ## Base url of SGO service
+      url: https://sgo.university.com/
+      ## Api-Key
+      key: default-key
+      ## Base url of SGO service standalone implementation
+      standalone: http://sgi-sgo-service
+  ## SGI module config
+  sgi:
+    service:
+      ## Base url of CSP service
+      cspUrl: http://sgi-sgi-csp-service
+      ## Base url of EER service
+      eerUrl: http://sgi-sgi-eer-service
+      ## Base url of PRC service
+      prcUrl: http://sgi-sgi-prc-service
+      ## Base url of USR service
+      usrUrl: http://sgi-sgi-usr-service
+  ## CVN module config
+  cvn:
+    service:
+      ## Base url of CVN service
+      url: https://cvn.university.com/
+      ## Api-Key
+      key: default-key
+
+  ## Aditional environment variables
+  ## Values can be provided from secrets, see https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-environment-variables
+  extraEnvVariables:
+    ## Runtime context
+    - name: SGI_ESB_CONTEXT
+      value: "dev"
+
+  ## Should be enabled and set the correct hostname to be accesible from outside
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      nginx.ingress.kubernetes.io/rewrite-target: $1
+      nginx.ingress.kubernetes.io/proxy-body-size: "10m" #Default size is 1M, needed for sgdoc
+    hosts:
+      - host: demo.hercules-sgi.local
+        paths:
+          - path: /api(/.*)
+
+## Standalone implementation of SGP Service (Isn't available)
+sgp:
+  enabled: false
+
+## Standalone implementation of SGEMP Service (Isn't available)
+sgemp:
+  enabled: false
+
+## Standalone implementation of SGO Service (Partially used, don't disable it)
+sgo:
+  enabled: true
+sgo-service:
+
+  image:
+    # image.repository is required
+    repository: h3rcul3scru3/sgo-service
+    pullPolicy: IfNotPresent
+    # image.tag is required
+    tag: 0.2.0
+
+  # Database configuration
+  database:
+    # wether to create a database to have side by side with container
+    # in the same pod (sidecar)
+    use_sidecar: true
+    # persistence of the sidecar when used
+    persistence:
+      enabled: false
+      storageClass: ""
+      accessModes:
+        - ReadWriteOnce
+      size: 1Gi
+  # Service persistence configuration, when needed
+  persistence:
+    enabled: false
+    storageClass: ""
+    mountPath: /data
+    accessModes:
+      - ReadWriteOnce
+    size: 10Gi
+
+  spring:
+    ## JDBC connection to database
+    datasourceUrl: jdbc:postgresql://sgi-postgresql:5432/db
+    ## Valid values: dev or pro
+    ## With dev, sample data will be loaded
+    liquibaseContexts: dev
+
+  ## Aditional Enviroment Variables (See Spring Boot Documentation) for additional supported variables
+  ## Values can be provided from secrets, see https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-environment-variables
+  extraEnvVariables:
+    ## Datasource configuration
+    - name: SPRING_DATASOURCE_INITIALIZATION-MODE
+      value: ALWAYS
+    - name: SPRING_DATASOURCE_DRIVER-CLASS-NAME
+      value: org.postgresql.Driver
+    - name: SPRING_DATASOURCE_USERNAME
+      value: sgo
+    - name: SPRING_DATASOURCE_PASSWORD
+      value: sgo
+    - name: SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT
+      value: org.hibernate.dialect.PostgreSQL95Dialect
+
+## Standalone implementation of SGE Service (Isn't available)
+sge:
+  enabled: false
+
+## Standalone implementation of SGO Service (Partially used, don't disable it)
+sgdoc:
+  enabled: true
+sgdoc-service:
+
+  image:
+    # image.repository is required
+    repository: h3rcul3scru3/sgdoc-service
+    pullPolicy: IfNotPresent
+    # image.tag is required
+    tag: 0.2.0
+
+  # Database configuration
+  database:
+    # wether to create a database to have side by side with container
+    # in the same pod (sidecar)
+    use_sidecar: true
+    # persistence of the sidecar when used
+    persistence:
+      enabled: false
+      storageClass: ""
+      accessModes:
+        - ReadWriteOnce
+      size: 1Gi
+  # Service persistence configuration, when needed
+  persistence:
+    enabled: false
+    storageClass: ""
+    mountPath: /data
+    accessModes:
+      - ReadWriteOnce
+    size: 10Gi
+
+  spring:
+    ## JDBC connection to database
+    datasourceUrl: jdbc:postgresql://sgi-postgresql:5432/db
+    ## Valid values: dev or pro
+    ## With dev, sample data will be loaded
+    liquibaseContexts: dev
+
+  ## Aditional Enviroment Variables (See Spring Boot Documentation) for additional supported variables
+  ## Values can be provided from secrets, see https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-environment-variables
+  extraEnvVariables:
+    ## Datasource configuration
+    - name: SPRING_DATASOURCE_INITIALIZATION-MODE
+      value: ALWAYS
+    - name: SPRING_DATASOURCE_DRIVER-CLASS-NAME
+      value: org.postgresql.Driver
+    - name: SPRING_DATASOURCE_USERNAME
+      value: sgo
+    - name: SPRING_DATASOURCE_PASSWORD
+      value: sgo
+    - name: SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT
+      value: org.hibernate.dialect.PostgreSQL95Dialect
+
+## Auxiliar postgresql deployment. Use binami chart version 10.16.2
+## To see all available options, helm show values bitnami/postgresql --version 10.16.2
+postgresql:
+  # wether to create or not an external persistent database
+  enabled: true
+
+  # image version to use
+  image:
+    tag: 12
+
+  # persistence options
+  persistence:
+    enable: false
+    storageClass: ""
+
+  # database name and access
+  postgresqlDatabase: db
+  postgresqlUsername: postgres
+  postgresqlPassword: admin
+
+  # Override postgresql.conf configuration
+  postgresqlExtendedConf: { "maxConnections": "2000" }
+
+  # this fixes issues with permissions in volume
+  volumePermissions:
+    enabled: true

@@ -1,0 +1,2281 @@
+## Default values for sgi-umbrella.
+## This is a YAML-formatted file.
+## Declare variables to be passed into your templates.
+
+nameOverride: ""
+fullnameOverride: ""
+
+## WEB deployment
+sgi-webapp:
+  replicaCount: 1
+
+  image:
+    # image.repository is required
+    repository: sgi/sgi-webapp
+    pullPolicy: IfNotPresent
+    # image.tag is required
+    tag: latest
+
+  imagePullSecrets: []
+  nameOverride: ""
+  fullnameOverride: ""
+
+  serviceAccount:
+    # Specifies whether a service account should be created
+    create: false
+    # Annotations to add to the service account
+    annotations: {}
+    # The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+
+  #by default activate rollme annotation to rollout pod with every update
+  annotations:
+    enabled: true
+    podAnnotations: {}
+
+  podSecurityContext:
+    {}
+    # fsGroup: 2000
+
+  securityContext:
+    {}
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+    # runAsUser: 1000
+
+  service:
+    type: ClusterIP
+    port: 80
+
+  ## Should be enabled and set the correct hostname to be accesible from outside
+  ingress:
+    enabled: false
+    annotations:
+      kubernetes.io/ingress.class: nginx
+    hosts:
+      - host: chart-example.local
+        paths: /
+    tls: []
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
+
+  resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+## USR Service
+sgi-usr-service:
+  replicaCount: 1
+
+  image:
+    # image.repository is required
+    repository: sgi/usr-service
+    pullPolicy: IfNotPresent
+    # image.tag is required
+    tag: latest
+
+  database:
+    ## wether to create a database to have side by side with container
+    ## in the same pod (sidecar).
+    ##
+    ## If enabled, It will be a postgresql with that values:
+    ##    Name: postgres-container
+    ##    Username: postgres
+    ##    Password: admin
+    ##    Database: db
+    ## So, the datasourceUrl and extraEnvVariables should be adapted.
+    use_sidecar: false
+
+  server:
+    port: 8080
+
+  spring:
+    ## Endpoint of Signing certificate of JWT tokens. Change only the hostname or protocol.
+    securityOauth2ResourceserverJwtJwkSetUri: http://sgi-sgi-keycloak/auth/realms/sgi/protocol/openid-connect/certs
+    ## Standard discovery endpoint for Oauth2. Change only the hostname or protocol.
+    securityOauth2ClientProviderKeycloackIssuerUri: http://sgi-sgi-keycloak/auth/realms/sgi
+    ## JDBC conection to database
+    datasourceUrl: jdbc:postgresql://sgi-postgresql:5432/db
+    ## Valid values: dev or pro
+    ## With dev, sample data will be loaded
+    liquibaseContexts: dev
+
+  ## Aditional Enviroment Variables (See Spring Boot Documentation) for additional supported variables
+  ## Values can be provided from secrets, see https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-environment-variables
+  extraEnvVariables:
+    - name: SPRING_DATASOURCE_INITIALIZATION-MODE
+      value: ALWAYS
+    - name: SPRING_DATASOURCE_DRIVER-CLASS-NAME
+      value: org.postgresql.Driver
+    - name: SPRING_DATASOURCE_USERNAME
+      value: usr
+    - name: SPRING_DATASOURCE_PASSWORD
+      value: usr
+    - name: SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT
+      value: org.hibernate.dialect.PostgreSQL95Dialect
+
+  imagePullSecrets: []
+  nameOverride: ""
+  fullnameOverride: ""
+
+  serviceAccount:
+    # Specifies whether a service account should be created
+    create: false
+    # Annotations to add to the service account
+    annotations: {}
+    # The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+
+  #by default activate rollme annotation to rollout pod with every update
+  annotations:
+    enabled: true
+    podAnnotations: {}
+
+  podSecurityContext:
+    {}
+    # fsGroup: 2000
+
+  securityContext:
+    {}
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+    # runAsUser: 1000
+
+  service:
+    type: ClusterIP
+    port: 80
+
+  ## Should be enabled and set the correct hostname to be accesible from outside
+  ingress:
+    enabled: false
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      nginx.ingress.kubernetes.io/rewrite-target: /$2
+    hosts:
+      - host: chart-example.local
+        paths:
+          - path: /api/usr(/|$)(.*)
+    tls: []
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
+
+  resources:
+    {}
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+## EER Service
+sgi-eer-service:
+  replicaCount: 1
+
+  image:
+    # image.repository is required
+    repository: sgi/eer-service
+    pullPolicy: IfNotPresent
+    # image.tag is required
+    tag: latest
+
+  database:
+    ## wether to create a database to have side by side with container
+    ## in the same pod (sidecar).
+    ##
+    ## If enabled, It will be a postgresql with that values:
+    ##    Name: postgres-container
+    ##    Username: postgres
+    ##    Password: admin
+    ##    Database: db
+    ## So, the datasourceUrl and extraEnvVariables should be adapted.
+    use_sidecar: false
+
+  server:
+    port: 8080
+
+  spring:
+    ## Endpoint of Signing certificate of JWT tokens. Change only the hostname or protocol.
+    securityOauth2ResourceserverJwtJwkSetUri: http://sgi-sgi-keycloak/auth/realms/sgi/protocol/openid-connect/certs
+    ## Standard discovery endpoint for Oauth2. Change only the hostname or protocol.
+    securityOauth2ClientProviderKeycloackIssuerUri: http://sgi-sgi-keycloak/auth/realms/sgi
+    ## JDBC conection to database
+    datasourceUrl: jdbc:postgresql://sgi-postgresql:5432/db
+    ## Valid values: dev or pro
+    ## With dev, sample data will be loaded
+    liquibaseContexts: dev
+
+  ## Aditional Enviroment Variables (See Spring Boot Documentation) for additional supported variables
+  ## Values can be provided from secrets, see https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-environment-variables
+  extraEnvVariables:
+    ## Datasource configuration
+    - name: SPRING_DATASOURCE_INITIALIZATION-MODE
+      value: ALWAYS
+    - name: SPRING_DATASOURCE_DRIVER-CLASS-NAME
+      value: org.postgresql.Driver
+    - name: SPRING_DATASOURCE_USERNAME
+      value: eer
+    - name: SPRING_DATASOURCE_PASSWORD
+      value: eer
+    - name: SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT
+      value: org.hibernate.dialect.PostgreSQL95Dialect
+
+  imagePullSecrets: []
+  nameOverride: ""
+  fullnameOverride: ""
+
+  serviceAccount:
+    # Specifies whether a service account should be created
+    create: false
+    # Annotations to add to the service account
+    annotations: {}
+    # The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+
+  #by default activate rollme annotation to rollout pod with every update
+  annotations:
+    enabled: true
+    podAnnotations: {}
+
+  podSecurityContext:
+    {}
+    # fsGroup: 2000
+
+  securityContext:
+    {}
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+    # runAsUser: 1000
+
+  service:
+    type: ClusterIP
+    port: 80
+
+  ## Should be enabled and set the correct hostname to be accesible from outside
+  ingress:
+    enabled: false
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      nginx.ingress.kubernetes.io/rewrite-target: /$2
+    hosts:
+      - host: chart-example.local
+        paths:
+          - path: /api/eer(/|$)(.*)
+    tls: []
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
+
+  resources:
+    {}
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+## ETI Service
+sgi-eti-service:
+  replicaCount: 1
+
+  image:
+    # image.repository is required
+    repository: sgi/eti-service
+    pullPolicy: IfNotPresent
+    # image.tag is required
+    tag: latest
+
+  database:
+    ## wether to create a database to have side by side with container
+    ## in the same pod (sidecar).
+    ##
+    ## If enabled, It will be a postgresql with that values:
+    ##    Name: postgres-container
+    ##    Username: postgres
+    ##    Password: admin
+    ##    Database: db
+    ## So, the datasourceUrl and extraEnvVariables should be adapted.
+    use_sidecar: false
+
+  server:
+    port: 8080
+
+  spring:
+    ## Endpoint of Signing certificate of JWT tokens. Change only the hostname or protocol.
+    securityOauth2ResourceserverJwtJwkSetUri: http://sgi-sgi-keycloak/auth/realms/sgi/protocol/openid-connect/certs
+    ## Standard discovery endpoint for Oauth2. Change only the hostname or protocol.
+    securityOauth2ClientProviderKeycloackIssuerUri: http://sgi-sgi-keycloak/auth/realms/sgi
+    ## JDBC conection to database
+    datasourceUrl: jdbc:postgresql://sgi-postgresql:5432/db
+    ## Valid values: dev or pro
+    ## With dev, sample data will be loaded
+    liquibaseContexts: dev
+
+  ## Aditional Enviroment Variables (See Spring Boot Documentation) for additional supported variables
+  ## Values can be provided from secrets, see https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-environment-variables
+  extraEnvVariables:
+    ## rep-service base url
+    - name: SGI_REST_API_REP-URL
+      value: "http://sgi-sgi-rep-service"
+    ## ESB sgdoc base url
+    - name: SGI_REST_API_SGDOC-URL
+      value: "http://sgi-sgi-esb/sgdoc"
+    ## ESB sgp base url
+    - name: SGI_REST_API_SGP-URL
+      value: "http://sgi-sgi-esb/sgp"
+    ## com-service base url
+    - name: SGI_REST_API_COM-URL
+      value: "http://sgi-sgi-com-service"
+    ## cnf-service base url
+    - name: SGI_REST_API_CNF-URL
+      value: "http://sgi-sgi-cnf-service"
+    ## external webapp accesible base url
+    - name: SGI_WEB-URL
+      value: "http://chart-example.local"
+    ## Blockchain API base url
+    - name: SGI_BLOCKCHAIN_URL
+      value: "http://blockchain.local"
+    ## Blockchain API password
+    - name: SGI_BLOCKCHAIN_PASSWORD
+      value: "password"
+    ## Datasource configuration
+    - name: SPRING_DATASOURCE_INITIALIZATION-MODE
+      value: ALWAYS
+    - name: SPRING_DATASOURCE_DRIVER-CLASS-NAME
+      value: org.postgresql.Driver
+    - name: SPRING_DATASOURCE_USERNAME
+      value: eti
+    - name: SPRING_DATASOURCE_PASSWORD
+      value: eti
+    - name: SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT
+      value: org.hibernate.dialect.PostgreSQL95Dialect
+
+  imagePullSecrets: []
+  nameOverride: ""
+  fullnameOverride: ""
+
+  serviceAccount:
+    # Specifies whether a service account should be created
+    create: false
+    # Annotations to add to the service account
+    annotations: {}
+    # The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+
+  #by default activate rollme annotation to rollout pod with every update
+  annotations:
+    enabled: true
+    podAnnotations: {}
+
+  podSecurityContext:
+    {}
+    # fsGroup: 2000
+
+  securityContext:
+    {}
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+    # runAsUser: 1000
+
+  service:
+    type: ClusterIP
+    port: 80
+
+  ## Should be enabled and set the correct hostname to be accesible from outside
+  ingress:
+    enabled: false
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      nginx.ingress.kubernetes.io/rewrite-target: /$2
+    hosts:
+      - host: chart-example.local
+        paths:
+          - path: /api/eti(/|$)(.*)
+    tls: []
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
+
+  resources:
+    {}
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+## CSP Service
+sgi-csp-service:
+  replicaCount: 1
+
+  image:
+    # image.repository is required
+    repository: sgi/csp-service
+    pullPolicy: IfNotPresent
+    # image.tag is required
+    tag: latest
+
+  database:
+    ## wether to create a database to have side by side with container
+    ## in the same pod (sidecar).
+    ##
+    ## If enabled, It will be a postgresql with that values:
+    ##    Name: postgres-container
+    ##    Username: postgres
+    ##    Password: admin
+    ##    Database: db
+    ## So, the datasourceUrl and extraEnvVariables should be adapted.
+    use_sidecar: false
+
+  server:
+    port: 8080
+
+  spring:
+    ## Endpoint of Signing certificate of JWT tokens. Change only the hostname or protocol.
+    securityOauth2ResourceserverJwtJwkSetUri: http://sgi-sgi-keycloak/auth/realms/sgi/protocol/openid-connect/certs
+    ## Standard discovery endpoint for Oauth2. Change only the hostname or protocol.
+    securityOauth2ClientProviderKeycloackIssuerUri: http://sgi-sgi-keycloak/auth/realms/sgi
+    ## JDBC conection to database
+    datasourceUrl: jdbc:postgresql://sgi-postgresql:5432/db
+    ## Valid values: dev or pro
+    ## With dev, sample data will be loaded
+    liquibaseContexts: dev
+
+  ## Aditional Enviroment Variables (See Spring Boot Documentation) for additional supported variables
+  ## Values can be provided from secrets, see https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-environment-variables
+  extraEnvVariables:
+    ## cnf-service base url
+    - name: SGI_REST_API_CNF-URL
+      value: "http://sgi-sgi-cnf-service"
+    ## com-service base url
+    - name: SGI_REST_API_COM-URL
+      value: "http://sgi-sgi-com-service"
+    ## eti-service base url
+    - name: SGI_REST_API_ETI-URL
+      value: "http://sgi-sgi-eti-service"
+    ## rep-service base url
+    - name: SGI_REST_API_REP-URL
+      value: "http://sgi-sgi-rep-service"
+    ## ESB sgdoc base url
+    - name: SGI_REST_API_SGDOC-URL
+      value: "http://sgi-sgi-esb/sgdoc"
+    ## ESB sgp base url
+    - name: SGI_REST_API_SGP-URL
+      value: "http://sgi-sgi-esb/sgp"
+    ## tp-service base url
+    - name: SGI_REST_API_TP-URL
+      value: "http://sgi-sgi-tp-service"
+    ## ESB sgemp base url
+    - name: SGI_REST_API_SGEMP-URL
+      value: "http://sgi-sgi-esb/sgemp"
+    ## external webapp accesible base url
+    - name: SGI_WEB-URL
+      value: "http://chart-example.local"
+    ## Datasource configuration
+    - name: SPRING_DATASOURCE_INITIALIZATION-MODE
+      value: ALWAYS
+    - name: SPRING_DATASOURCE_DRIVER-CLASS-NAME
+      value: org.postgresql.Driver
+    - name: SPRING_DATASOURCE_USERNAME
+      value: csp
+    - name: SPRING_DATASOURCE_PASSWORD
+      value: csp
+    - name: SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT
+      value: org.hibernate.dialect.PostgreSQL95Dialect
+
+  imagePullSecrets: []
+  nameOverride: ""
+  fullnameOverride: ""
+
+  serviceAccount:
+    # Specifies whether a service account should be created
+    create: false
+    # Annotations to add to the service account
+    annotations: {}
+    # The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+
+  #by default activate rollme annotation to rollout pod with every update
+  annotations:
+    enabled: true
+    podAnnotations: {}
+
+  podSecurityContext:
+    {}
+    # fsGroup: 2000
+
+  securityContext:
+    {}
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+    # runAsUser: 1000
+
+  service:
+    type: ClusterIP
+    port: 80
+
+  ## Should be enabled and set the correct hostname to be accesible from outside
+  ingress:
+    enabled: false
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      nginx.ingress.kubernetes.io/rewrite-target: /$2
+    hosts:
+      - host: chart-example.local
+        paths:
+          - path: /api/csp(/|$)(.*)
+    tls: []
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
+
+  resources:
+    {}
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+## PII Service
+sgi-pii-service:
+  replicaCount: 1
+
+  image:
+    # image.repository is required
+    repository: sgi/pii-service
+    pullPolicy: IfNotPresent
+    # image.tag is required
+    tag: latest
+
+  database:
+    ## wether to create a database to have side by side with container
+    ## in the same pod (sidecar).
+    ##
+    ## If enabled, It will be a postgresql with that values:
+    ##    Name: postgres-container
+    ##    Username: postgres
+    ##    Password: admin
+    ##    Database: db
+    ## So, the datasourceUrl and extraEnvVariables should be adapted.
+    use_sidecar: false
+
+  server:
+    port: 8080
+
+  spring:
+    ## Endpoint of Signing certificate of JWT tokens. Change only the hostname or protocol.
+    securityOauth2ResourceserverJwtJwkSetUri: http://sgi-sgi-keycloak/auth/realms/sgi/protocol/openid-connect/certs
+    ## Standard discovery endpoint for Oauth2. Change only the hostname or protocol.
+    securityOauth2ClientProviderKeycloackIssuerUri: http://sgi-sgi-keycloak/auth/realms/sgi
+    ## JDBC conection to database
+    datasourceUrl: jdbc:postgresql://sgi-postgresql:5432/db
+    ## Valid values: dev or pro
+    ## With dev, sample data will be loaded
+    liquibaseContexts: dev
+
+  ## Aditional Enviroment Variables (See Spring Boot Documentation) for additional supported variables
+  ## Values can be provided from secrets, see https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-environment-variables
+  extraEnvVariables:
+    ## cnf-service base url
+    - name: SGI_REST_API_CNF-URL
+      value: "http://sgi-sgi-cnf-service"
+    ## com-service base url
+    - name: SGI_REST_API_COM-URL
+      value: "http://sgi-sgi-com-service"
+    ## tp-service base url
+    - name: SGI_REST_API_TP-URL
+      value: "http://sgi-sgi-tp-service"
+    ## Datasource configuration
+    - name: SPRING_DATASOURCE_INITIALIZATION-MODE
+      value: ALWAYS
+    - name: SPRING_DATASOURCE_DRIVER-CLASS-NAME
+      value: org.postgresql.Driver
+    - name: SPRING_DATASOURCE_USERNAME
+      value: pii
+    - name: SPRING_DATASOURCE_PASSWORD
+      value: pii
+    - name: SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT
+      value: org.hibernate.dialect.PostgreSQL95Dialect
+
+  imagePullSecrets: []
+  nameOverride: ""
+  fullnameOverride: ""
+
+  serviceAccount:
+    # Specifies whether a service account should be created
+    create: false
+    # Annotations to add to the service account
+    annotations: {}
+    # The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+
+  #by default activate rollme annotation to rollout pod with every update
+  annotations:
+    enabled: true
+    podAnnotations: {}
+
+  podSecurityContext:
+    {}
+    # fsGroup: 2000
+
+  securityContext:
+    {}
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+    # runAsUser: 1000
+
+  service:
+    type: ClusterIP
+    port: 80
+
+  ## Should be enabled and set the correct hostname to be accesible from outside
+  ingress:
+    enabled: false
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      nginx.ingress.kubernetes.io/rewrite-target: /$2
+    hosts:
+      - host: chart-example.local
+        paths:
+          - path: /api/pii(/|$)(.*)
+    tls: []
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
+
+  resources:
+    {}
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+## REL Service
+sgi-rel-service:
+  replicaCount: 1
+
+  image:
+    # image.repository is required
+    repository: sgi/rel-service
+    pullPolicy: IfNotPresent
+    # image.tag is required
+    tag: latest
+
+  database:
+    ## wether to create a database to have side by side with container
+    ## in the same pod (sidecar).
+    ##
+    ## If enabled, It will be a postgresql with that values:
+    ##    Name: postgres-container
+    ##    Username: postgres
+    ##    Password: admin
+    ##    Database: db
+    ## So, the datasourceUrl and extraEnvVariables should be adapted.
+    use_sidecar: false
+
+  server:
+    port: 8080
+
+  spring:
+    ## Endpoint of Signing certificate of JWT tokens. Change only the hostname or protocol.
+    securityOauth2ResourceserverJwtJwkSetUri: http://sgi-sgi-keycloak/auth/realms/sgi/protocol/openid-connect/certs
+    ## Standard discovery endpoint for Oauth2. Change only the hostname or protocol.
+    securityOauth2ClientProviderKeycloackIssuerUri: http://sgi-sgi-keycloak/auth/realms/sgi
+    ## JDBC conection to database
+    datasourceUrl: jdbc:postgresql://sgi-postgresql:5432/db
+    ## Valid values: dev or pro
+    ## With dev, sample data will be loaded
+    liquibaseContexts: dev
+
+  ## Aditional Enviroment Variables (See Spring Boot Documentation) for additional supported variables
+  ## Values can be provided from secrets, see https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-environment-variables
+  extraEnvVariables:
+    ## Datasource configuration
+    - name: SPRING_DATASOURCE_INITIALIZATION-MODE
+      value: ALWAYS
+    - name: SPRING_DATASOURCE_DRIVER-CLASS-NAME
+      value: org.postgresql.Driver
+    - name: SPRING_DATASOURCE_USERNAME
+      value: rel
+    - name: SPRING_DATASOURCE_PASSWORD
+      value: rel
+    - name: SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT
+      value: org.hibernate.dialect.PostgreSQL95Dialect
+
+  imagePullSecrets: []
+  nameOverride: ""
+  fullnameOverride: ""
+
+  serviceAccount:
+    # Specifies whether a service account should be created
+    create: false
+    # Annotations to add to the service account
+    annotations: {}
+    # The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+
+  #by default activate rollme annotation to rollout pod with every update
+  annotations:
+    enabled: true
+    podAnnotations: {}
+
+  podSecurityContext:
+    {}
+    # fsGroup: 2000
+
+  securityContext:
+    {}
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+    # runAsUser: 1000
+
+  service:
+    type: ClusterIP
+    port: 80
+
+  ## Should be enabled and set the correct hostname to be accesible from outside
+  ingress:
+    enabled: false
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      nginx.ingress.kubernetes.io/rewrite-target: /$2
+    hosts:
+      - host: chart-example.local
+        paths:
+          - path: /api/rel(/|$)(.*)
+    tls: []
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
+
+  resources:
+    {}
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+## TP Service
+sgi-tp-service:
+  replicaCount: 1
+
+  image:
+    # image.repository is required
+    repository: sgi/tp-service
+    pullPolicy: IfNotPresent
+    # image.tag is required
+    tag: latest
+
+  database:
+    ## wether to create a database to have side by side with container
+    ## in the same pod (sidecar).
+    ##
+    ## If enabled, It will be a postgresql with that values:
+    ##    Name: postgres-container
+    ##    Username: postgres
+    ##    Password: admin
+    ##    Database: db
+    ## So, the datasourceUrl and extraEnvVariables should be adapted.
+    use_sidecar: false
+
+  server:
+    port: 8080
+
+  spring:
+    ## Endpoint of Signing certificate of JWT tokens. Change only the hostname or protocol.
+    securityOauth2ResourceserverJwtJwkSetUri: http://sgi-sgi-keycloak/auth/realms/sgi/protocol/openid-connect/certs
+    ## Standard discovery endpoint for Oauth2. Change only the hostname or protocol.
+    securityOauth2ClientProviderKeycloackIssuerUri: http://sgi-sgi-keycloak/auth/realms/sgi
+    ## JDBC conection to database
+    datasourceUrl: jdbc:postgresql://sgi-postgresql:5432/db
+    ## Valid values: dev or pro
+    ## With dev, sample data will be loaded
+    liquibaseContexts: dev
+
+  ## Aditional Enviroment Variables (See Spring Boot Documentation) for additional supported variables
+  ## Values can be provided from secrets, see https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-environment-variables
+  extraEnvVariables:
+    ## Endpoint for taking JWT tokens. Change only the hostname or protocol.
+    - name: SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_TOKEN-URI
+      value: http://sgi-sgi-keycloak/auth/realms/sgi/protocol/openid-connect/token
+    ## com-service base url
+    - name: SGI_REST_API_COM-URL
+      value: "http://sgi-sgi-com-service"
+    ## csp-service base url
+    - name: SGI_REST_API_CSP-URL
+      value: "http://sgi-sgi-csp-service"
+    ## eti-service base url
+    - name: SGI_REST_API_ETI-URL
+      value: "http://sgi-sgi-eti-service"
+    ## pii-service base url
+    - name: SGI_REST_API_PII-URL
+      value: "http://sgi-sgi-pii-service"
+    ## prc-service base url
+    - name: SGI_REST_API_PRC-URL
+      value: "http://sgi-sgi-prc-service"
+    ## rel-service base url
+    - name: SGI_REST_API_REL-URL
+      value: "http://sgi-sgi-rel-service"
+    ## rep-service base url
+    - name: SGI_REST_API_REP-URL
+      value: "http://sgi-sgi-rep-service"
+    ## usr-service base url
+    - name: SGI_REST_API_USR-URL
+      value: "http://sgi-sgi-usr-service"
+    ## Datasource configuration
+    - name: SPRING_DATASOURCE_INITIALIZATION-MODE
+      value: ALWAYS
+    - name: SPRING_DATASOURCE_DRIVER-CLASS-NAME
+      value: org.postgresql.Driver
+    - name: SPRING_DATASOURCE_USERNAME
+      value: tp
+    - name: SPRING_DATASOURCE_PASSWORD
+      value: tp
+    - name: SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT
+      value: org.hibernate.dialect.PostgreSQL95Dialect
+
+  imagePullSecrets: []
+  nameOverride: ""
+  fullnameOverride: ""
+
+  serviceAccount:
+    # Specifies whether a service account should be created
+    create: false
+    # Annotations to add to the service account
+    annotations: {}
+    # The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+
+  #by default activate rollme annotation to rollout pod with every update
+  annotations:
+    enabled: true
+    podAnnotations: {}
+
+  podSecurityContext:
+    {}
+    # fsGroup: 2000
+
+  securityContext:
+    {}
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+    # runAsUser: 1000
+
+  service:
+    type: ClusterIP
+    port: 80
+
+  ## Should be enabled and set the correct hostname to be accesible from outside
+  ingress:
+    enabled: false
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      nginx.ingress.kubernetes.io/rewrite-target: /$2
+    hosts:
+      - host: chart-example.local
+        paths:
+          - path: /api/tp(/|$)(.*)
+    tls: []
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
+
+  resources:
+    {}
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+## REP Service
+sgi-rep-service:
+  replicaCount: 1
+
+  image:
+    # image.repository is required
+    repository: sgi/rep-service
+    pullPolicy: IfNotPresent
+    # image.tag is required
+    tag: latest
+
+  database:
+    ## wether to create a database to have side by side with container
+    ## in the same pod (sidecar).
+    ##
+    ## If enabled, It will be a postgresql with that values:
+    ##    Name: postgres-container
+    ##    Username: postgres
+    ##    Password: admin
+    ##    Database: db
+    ## So, the datasourceUrl and extraEnvVariables should be adapted.
+    use_sidecar: false
+
+  server:
+    port: 8080
+
+  spring:
+    ## Endpoint of Signing certificate of JWT tokens. Change only the hostname or protocol.
+    securityOauth2ResourceserverJwtJwkSetUri: http://sgi-sgi-keycloak/auth/realms/sgi/protocol/openid-connect/certs
+    ## Standard discovery endpoint for Oauth2. Change only the hostname or protocol.
+    securityOauth2ClientProviderKeycloackIssuerUri: http://sgi-sgi-keycloak/auth/realms/sgi
+    ## JDBC conection to database
+    datasourceUrl: jdbc:postgresql://sgi-postgresql:5432/db
+    ## Valid values: dev or pro
+    ## With dev, sample data will be loaded
+    liquibaseContexts: dev
+
+  ## Aditional Enviroment Variables (See Spring Boot Documentation) for additional supported variables
+  ## Values can be provided from secrets, see https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-environment-variables
+  extraEnvVariables:
+    ## cnf-service base url
+    - name: SGI_REST_API_CNF-URL
+      value: "http://sgi-sgi-cnf-service"
+    ## com-service base url
+    - name: SGI_REST_API_COM-URL
+      value: "http://sgi-sgi-com-service"
+    ## csp-service base url
+    - name: SGI_REST_API_CSP-URL
+      value: "http://sgi-sgi-csp-service"
+    ## eti-service base url
+    - name: SGI_REST_API_ETI-URL
+      value: "http://sgi-sgi-eti-service"
+    ## pii-service base url
+    - name: SGI_REST_API_PII-URL
+      value: "http://sgi-sgi-pii-service"
+    ## prc-service base url
+    - name: SGI_REST_API_PRC-URL
+      value: "http://sgi-sgi-prc-service"
+    ## rel-service base url
+    - name: SGI_REST_API_REL-URL
+      value: "http://sgi-sgi-rel-service"
+    ## ESB sgemp base url
+    - name: SGI_REST_API_SGEMP-URL
+      value: "http://sgi-sgi-esb/sgemp"
+    ## ESB sgp base url
+    - name: SGI_REST_API_SGP-URL
+      value: "http://sgi-sgi-esb/sgp"
+    ## tp-service base url
+    - name: SGI_REST_API_TP-URL
+      value: "http://sgi-sgi-tp-service"
+    ## usr-service base url
+    - name: SGI_REST_API_USR-URL
+      value: "http://sgi-sgi-usr-service"
+    ## Datasource configuration
+    - name: SPRING_DATASOURCE_INITIALIZATION-MODE
+      value: ALWAYS
+    - name: SPRING_DATASOURCE_DRIVER-CLASS-NAME
+      value: org.postgresql.Driver
+    - name: SPRING_DATASOURCE_USERNAME
+      value: rep
+    - name: SPRING_DATASOURCE_PASSWORD
+      value: rep
+    - name: SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT
+      value: org.hibernate.dialect.PostgreSQL95Dialect
+
+  imagePullSecrets: []
+  nameOverride: ""
+  fullnameOverride: ""
+
+  serviceAccount:
+    # Specifies whether a service account should be created
+    create: false
+    # Annotations to add to the service account
+    annotations: {}
+    # The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+
+  #by default activate rollme annotation to rollout pod with every update
+  annotations:
+    enabled: true
+    podAnnotations: {}
+
+  podSecurityContext:
+    {}
+    # fsGroup: 2000
+
+  securityContext:
+    {}
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+    # runAsUser: 1000
+
+  service:
+    type: ClusterIP
+    port: 80
+
+  ## Should be enabled and set the correct hostname to be accesible from outside
+  ingress:
+    enabled: false
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      nginx.ingress.kubernetes.io/rewrite-target: /$2
+    hosts:
+      - host: chart-example.local
+        paths:
+          - path: /api/rep(/|$)(.*)
+    tls: []
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
+
+  resources:
+    {}
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+## COM Service
+sgi-com-service:
+  replicaCount: 1
+
+  image:
+    # image.repository is required
+    repository: sgi/com-service
+    pullPolicy: IfNotPresent
+    # image.tag is required
+    tag: latest
+
+  database:
+    ## wether to create a database to have side by side with container
+    ## in the same pod (sidecar).
+    ##
+    ## If enabled, It will be a postgresql with that values:
+    ##    Name: postgres-container
+    ##    Username: postgres
+    ##    Password: admin
+    ##    Database: db
+    ## So, the datasourceUrl and extraEnvVariables should be adapted.
+    use_sidecar: false
+
+  server:
+    port: 8080
+
+  spring:
+    ## Endpoint of Signing certificate of JWT tokens. Change only the hostname or protocol.
+    securityOauth2ResourceserverJwtJwkSetUri: http://sgi-sgi-keycloak/auth/realms/sgi/protocol/openid-connect/certs
+    ## Standard discovery endpoint for Oauth2. Change only the hostname or protocol.
+    securityOauth2ClientProviderKeycloackIssuerUri: http://sgi-sgi-keycloak/auth/realms/sgi
+    ## JDBC conection to database
+    datasourceUrl: jdbc:postgresql://sgi-postgresql:5432/db
+    ## Valid values: dev or pro
+    ## With dev, sample data will be loaded
+    liquibaseContexts: dev
+
+  ## Aditional Enviroment Variables (See Spring Boot Documentation) for additional supported variables
+  ## Values can be provided from secrets, see https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-environment-variables
+  extraEnvVariables:
+    ## Send email host
+    - name: SPRING_MAIL_HOST
+      value: "smpt.email.com"
+    ## Send email host port
+    - name: SPRING_MAIL_PORT
+      value: "465"
+    ## Send email username
+    - name: SPRING_MAIL_USERNAME
+      value: "info@hercules.org"
+    ## Send email password
+    - name: SPRING_MAIL_PASSWORD
+      value: "password"
+    ## Disable the email sending
+    - name: SGI_DISABLE-EMAIL-SEND
+      value: "true"
+    ## If set all emails are sent to this instead of real recipient list
+    - name: SGI_FAKE-EMAIL-RECIPIENTS
+      value: ""
+    ## Endpoint for taking JWT tokens. Change only the hostname or protocol.
+    - name: SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_TOKEN-URI
+      value: http://sgi-sgi-keycloak/auth/realms/sgi/protocol/openid-connect/token
+    ## csp-service base url
+    - name: SGI_REST_API_CSP-URL
+      value: "http://sgi-sgi-csp-service"
+    ## eti-service base url
+    - name: SGI_REST_API_ETI-URL
+      value: "http://sgi-sgi-eti-service"
+    ## pii-service base url
+    - name: SGI_REST_API_PII-URL
+      value: "http://sgi-sgi-pii-service"
+    ## rel-service base url
+    - name: SGI_REST_API_REL-URL
+      value: "http://sgi-sgi-rel-service"
+    ## rep-service base url
+    - name: SGI_REST_API_REP-URL
+      value: "http://sgi-sgi-rep-service"
+    ## ESB sgdoc base url
+    - name: SGI_REST_API_SGDOC-URL
+      value: "http://sgi-sgi-esb/sgdoc"
+    ## tp-service base url
+    - name: SGI_REST_API_TP-URL
+      value: "http://sgi-sgi-tp-service"
+    ## usr-service base url
+    - name: SGI_REST_API_USR-URL
+      value: "http://sgi-sgi-usr-service"
+    ## Datasource configuration
+    - name: SPRING_DATASOURCE_INITIALIZATION-MODE
+      value: ALWAYS
+    - name: SPRING_DATASOURCE_DRIVER-CLASS-NAME
+      value: org.postgresql.Driver
+    - name: SPRING_DATASOURCE_USERNAME
+      value: com
+    - name: SPRING_DATASOURCE_PASSWORD
+      value: com
+    - name: SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT
+      value: org.hibernate.dialect.PostgreSQL95Dialect
+
+  imagePullSecrets: []
+  nameOverride: ""
+  fullnameOverride: ""
+
+  serviceAccount:
+    # Specifies whether a service account should be created
+    create: false
+    # Annotations to add to the service account
+    annotations: {}
+    # The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+
+  #by default activate rollme annotation to rollout pod with every update
+  annotations:
+    enabled: true
+    podAnnotations: {}
+
+  podSecurityContext:
+    {}
+    # fsGroup: 2000
+
+  securityContext:
+    {}
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+    # runAsUser: 1000
+
+  service:
+    type: ClusterIP
+    port: 80
+
+  ## Should be enabled and set the correct hostname to be accesible from outside
+  ingress:
+    enabled: false
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      nginx.ingress.kubernetes.io/rewrite-target: /$2
+    hosts:
+      - host: chart-example.local
+        paths:
+          - path: /api/com(/|$)(.*)
+    tls: []
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
+
+  resources:
+    {}
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+## CNF Service
+sgi-cnf-service:
+  replicaCount: 1
+
+  image:
+    # image.repository is required
+    repository: sgi/cnf-service
+    pullPolicy: IfNotPresent
+    # image.tag is required
+    tag: latest
+
+  database:
+    ## wether to create a database to have side by side with container
+    ## in the same pod (sidecar).
+    ##
+    ## If enabled, It will be a postgresql with that values:
+    ##    Name: postgres-container
+    ##    Username: postgres
+    ##    Password: admin
+    ##    Database: db
+    ## So, the datasourceUrl and extraEnvVariables should be adapted.
+    use_sidecar: false
+
+  server:
+    port: 8080
+
+  spring:
+    ## Endpoint of Signing certificate of JWT tokens. Change only the hostname or protocol.
+    securityOauth2ResourceserverJwtJwkSetUri: http://sgi-sgi-keycloak/auth/realms/sgi/protocol/openid-connect/certs
+    ## Standard discovery endpoint for Oauth2. Change only the hostname or protocol.
+    securityOauth2ClientProviderKeycloackIssuerUri: http://sgi-sgi-keycloak/auth/realms/sgi
+    ## JDBC conection to database
+    datasourceUrl: jdbc:postgresql://sgi-postgresql:5432/db
+    ## Valid values: dev or pro
+    ## With dev, sample data will be loaded
+    liquibaseContexts: dev
+
+  ## Aditional Enviroment Variables (See Spring Boot Documentation) for additional supported variables
+  ## Values can be provided from secrets, see https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-environment-variables
+  extraEnvVariables:
+    ## Datasource configuration
+    - name: SPRING_DATASOURCE_INITIALIZATION-MODE
+      value: ALWAYS
+    - name: SPRING_DATASOURCE_DRIVER-CLASS-NAME
+      value: org.postgresql.Driver
+    - name: SPRING_DATASOURCE_USERNAME
+      value: cnf
+    - name: SPRING_DATASOURCE_PASSWORD
+      value: cnf
+    - name: SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT
+      value: org.hibernate.dialect.PostgreSQL95Dialect
+
+  imagePullSecrets: []
+  nameOverride: ""
+  fullnameOverride: ""
+
+  serviceAccount:
+    # Specifies whether a service account should be created
+    create: false
+    # Annotations to add to the service account
+    annotations: {}
+    # The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+
+  #by default activate rollme annotation to rollout pod with every update
+  annotations:
+    enabled: true
+    podAnnotations: {}
+
+  podSecurityContext:
+    {}
+    # fsGroup: 2000
+
+  securityContext:
+    {}
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+    # runAsUser: 1000
+
+  service:
+    type: ClusterIP
+    port: 80
+
+  ## Should be enabled and set the correct hostname to be accesible from outside
+  ingress:
+    enabled: false
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      nginx.ingress.kubernetes.io/rewrite-target: /$2
+    hosts:
+      - host: chart-example.local
+        paths:
+          - path: /api/cnf(/|$)(.*)
+    tls: []
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
+
+  resources:
+    {}
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+## PRC Service
+sgi-prc-service:
+  replicaCount: 1
+
+  image:
+    # image.repository is required
+    repository: sgi/prc-service
+    pullPolicy: IfNotPresent
+    # image.tag is required
+    tag: latest
+
+  database:
+    ## wether to create a database to have side by side with container
+    ## in the same pod (sidecar).
+    ##
+    ## If enabled, It will be a postgresql with that values:
+    ##    Name: postgres-container
+    ##    Username: postgres
+    ##    Password: admin
+    ##    Database: db
+    ## So, the datasourceUrl and extraEnvVariables should be adapted.
+    use_sidecar: false
+
+  server:
+    port: 8080
+
+  spring:
+    ## Endpoint of Signing certificate of JWT tokens. Change only the hostname or protocol.
+    securityOauth2ResourceserverJwtJwkSetUri: http://sgi-sgi-keycloak/auth/realms/sgi/protocol/openid-connect/certs
+    ## Standard discovery endpoint for Oauth2. Change only the hostname or protocol.
+    securityOauth2ClientProviderKeycloackIssuerUri: http://sgi-sgi-keycloak/auth/realms/sgi
+    ## JDBC conection to database
+    datasourceUrl: jdbc:postgresql://sgi-postgresql:5432/db
+    ## Valid values: dev or pro
+    ## With dev, sample data will be loaded
+    liquibaseContexts: dev
+
+  ## Aditional Enviroment Variables (See Spring Boot Documentation) for additional supported variables
+  ## Values can be provided from secrets, see https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-environment-variables
+  extraEnvVariables:
+    ## cnf-service base url
+    - name: SGI_REST_API_CNF-URL
+      value: "http://sgi-sgi-cnf-service"
+    ## com-service base url
+    - name: SGI_REST_API_COM-URL
+      value: "http://sgi-sgi-com-service"
+    ## csp-service base url
+    - name: SGI_REST_API_CSP-URL
+      value: "http://sgi-sgi-csp-service"
+    ## pii-service base url
+    - name: SGI_REST_API_PII-URL
+      value: "http://sgi-sgi-pii-service"
+    ## rel-service base url
+    - name: SGI_REST_API_REL-URL
+      value: "http://sgi-sgi-rel-service"
+    ## rep-service base url
+    - name: SGI_REST_API_REP-URL
+      value: "http://sgi-sgi-rep-service"
+    ## ESB sgo base url
+    - name: SGI_REST_API_SGO-URL
+      value: "http://sgi-sgi-esb/sgo"
+    ## ESB sgepii base url
+    - name: SGI_REST_API_SGEPII-URL
+      value: "http://sgi-sgi-esb/sgepii"
+    ## ESB sgp base url
+    - name: SGI_REST_API_SGP-URL
+      value: "http://sgi-sgi-esb/sgp"
+    ## tp-service base url
+    - name: SGI_REST_API_TP-URL
+      value: "http://sgi-sgi-tp-service"
+    ## Datasource configuration
+    - name: SPRING_DATASOURCE_INITIALIZATION-MODE
+      value: ALWAYS
+    - name: SPRING_DATASOURCE_DRIVER-CLASS-NAME
+      value: org.postgresql.Driver
+    - name: SPRING_DATASOURCE_USERNAME
+      value: prc
+    - name: SPRING_DATASOURCE_PASSWORD
+      value: prc
+    - name: SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT
+      value: org.hibernate.dialect.PostgreSQL95Dialect
+
+  imagePullSecrets: []
+  nameOverride: ""
+  fullnameOverride: ""
+
+  serviceAccount:
+    # Specifies whether a service account should be created
+    create: false
+    # Annotations to add to the service account
+    annotations: {}
+    # The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+
+  #by default activate rollme annotation to rollout pod with every update
+  annotations:
+    enabled: true
+    podAnnotations: {}
+
+  podSecurityContext:
+    {}
+    # fsGroup: 2000
+
+  securityContext:
+    {}
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+    # runAsUser: 1000
+
+  service:
+    type: ClusterIP
+    port: 80
+
+  ## Should be enabled and set the correct hostname to be accesible from outside
+  ingress:
+    enabled: false
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      nginx.ingress.kubernetes.io/rewrite-target: /$2
+    hosts:
+      - host: chart-example.local
+        paths:
+          - path: /api/prc(/|$)(.*)
+    tls: []
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
+
+  resources:
+    {}
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+## AUTH Service based on Keycloak
+sgi-keycloak:
+  replicaCount: 1
+
+  image:
+    # image.repository is required
+    repository: sgi/auth
+    pullPolicy: IfNotPresent
+    # image.tag is required
+    tag: latest
+
+  settings:
+    # Admin username
+    keycloakUser: "admin"
+    # Admin password
+    keycloakPassword: "password"
+    # Enable running behind a proxy
+    proxyAddressForwarding: "true"
+    # Migration strategy when importing a realm on boot
+    keycloakMigrationStrategy: "IGNORE_EXISTING"
+
+  ## Aditional Enviroment Variables (See Spring Boot Documentation) for additional supported variables
+  ## Values can be provided from secrets, see https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-environment-variables
+  extraEnvVariables:
+    ## Database vendor. Valid values: h2 or postgres or oracle
+    - name: DB_VENDOR
+      value: "postgres"
+    ## Database hostname
+    - name: DB_ADDR
+      value: "sgi-postgresql"
+    ## Database port
+    - name: DB_PORT
+      value: "5432"
+    ## Database name.
+    ## Oracle database should be prefixed with ":" or "/", to connect in SID or Service mode respectively
+    - name: DB_DATABASE
+      value: "db"
+    ## Database schema
+    - name: DB_SCHEMA
+      value: "auth"
+    ## Database username
+    - name: DB_USER
+      value: "auth"
+    ## Database password
+    - name: DB_PASSWORD
+      value: "auth"
+
+  imagePullSecrets: []
+  nameOverride: ""
+  fullnameOverride: ""
+
+  serviceAccount:
+    # Specifies whether a service account should be created
+    create: false
+    # Annotations to add to the service account
+    annotations: {}
+    # The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+
+  #by default activate rollme annotation to rollout pod with every update
+  annotations:
+    enabled: true
+    podAnnotations: {}
+
+  podSecurityContext:
+    {}
+    # fsGroup: 2000
+
+  securityContext:
+    {}
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+    # runAsUser: 1000
+
+  configMap:
+    sgiRealmJson: "config/sgi-realm.json"
+
+  service:
+    type: ClusterIP
+    port: 80
+
+  ## Should be enabled and set the correct hostname to be accesible from outside
+  ingress:
+    enabled: false
+    annotations:
+      kubernetes.io/ingress.class: nginx
+    hosts:
+      - host: chart-example.local
+        paths:
+          - path: /auth
+    tls: []
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
+
+  resources:
+    {}
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+## ESB Service
+sgi-esb:
+  replicaCount: 1
+
+  image:
+    # image.repository is required
+    repository: sgi/esb-wso2-mi
+    pullPolicy: IfNotPresent
+    # image.tag is required
+    tag: latest
+
+  imagePullSecrets: []
+  nameOverride: ""
+  fullnameOverride: ""
+
+  serviceAccount:
+    # Specifies whether a service account should be created
+    create: false
+    # Annotations to add to the service account
+    annotations: {}
+    # The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+
+  ## Auth validation config
+  auth:
+    server:
+      ## Base url of SGI Auth Service. Change only hostname and protocol.
+      url: http://sgi-sgi-keycloak/auth
+      realm:
+        ## Realm of the auth. Don't change
+        id: sgi
+  ## SGDOC module config
+  sgdoc:
+    service:
+      ## Base url of SGDOC service
+      url: http://sgi-sgdoc-service
+  ## SGP module config
+  sgp:
+    service:
+      ## Base url of SGP service
+      url: http://chart-example.local
+      ## Api-Key
+      key: default-key
+  ## SGE module config
+  sge:
+    service:
+      ## Base url of SGE service
+      url: http://chart-example.local
+      ## Api-Key
+      key: default-key
+  ## SGEMP module config
+  sgemp:
+    service:
+      ## Base url of SGEMP service
+      url: http://chart-example.local
+      ## Api-Key
+      key: default-key
+  ## SGEPII module config
+  sgepii:
+    service:
+      ## Base url of SGEPII service
+      url: http://chart-example.local
+      ## Api-Key
+      key: default-key
+      ## Base url of PII service
+      piiUrl: http://sgi-sgi-pii-service
+  ## SGO module config
+  sgo:
+    service:
+      ## Base url of SGO service
+      url: http://chart-example.local
+      ## Api-Key
+      key: default-key
+      ## Base url of SGO service standalone implementation
+      standalone: http://sgi-sgo-service
+  ## SGI module config
+  sgi:
+    service:
+      ## Base url of CSP service
+      cspUrl: http://sgi-sgi-csp-service
+      ## Base url of EER service
+      eerUrl: http://sgi-sgi-eer-service
+      ## Base url of PRC service
+      prcUrl: http://sgi-sgi-prc-service
+      ## Base url of USR service
+      usrUrl: http://sgi-sgi-usr-service
+  ## CVN module config
+  cvn:
+    service:
+      ## Base url of CVN service
+      url: http://chart-example.local
+      ## Api-Key
+      key: default-key
+
+  ## Aditional environment variables
+  ## Values can be provided from secrets, see https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-environment-variables
+  extraEnvVariables:
+    ## Runtime context
+    - name: SGI_ESB_CONTEXT
+      value: "dev"
+
+  #by default activate rollme annotation to rollout pod with every update
+  annotations:
+    enabled: true
+    podAnnotations: {}
+
+  podSecurityContext:
+    {}
+    # fsGroup: 2000
+
+  securityContext:
+    {}
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+    # runAsUser: 1000
+
+  service:
+    type: ClusterIP
+    port: 80
+    internalPort: 8290
+
+  ## Should be enabled and set the correct hostname to be accesible from outside
+  ingress:
+    enabled: false
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      nginx.ingress.kubernetes.io/rewrite-target: $1
+      nginx.ingress.kubernetes.io/proxy-body-size: "10m" #Default size is 1M, needed for sgdoc
+    hosts:
+      - host: chart-example.local
+        paths:
+          - path: /api(/.*)
+    tls: []
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
+
+  resources:
+    {}
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+## Standalone implementation of SGP Service (Isn't available)
+sgp:
+  enabled: false
+
+## Standalone implementation of SGEMP Service (Isn't available)
+sgemp:
+  enabled: false
+
+## Standalone implementation of SGO Service (Partially used, don't disable it)
+sgo:
+  enabled: true
+sgo-service:
+  replicaCount: 1
+
+  image:
+    # image.repository is required
+    repository: sgi/external/sgo-service
+    pullPolicy: IfNotPresent
+    # image.tag is required
+    tag: latest
+
+  # Database configuration
+  database:
+    # wether to create a database to have side by side with container
+    # in the same pod (sidecar)
+    use_sidecar: true
+    # persistence of the sidecar when used
+    persistence:
+      enabled: false
+      storageClass: ""
+      accessModes:
+        - ReadWriteOnce
+      size: 1Gi
+  # Service persistence configuration, when needed
+  persistence:
+    enabled: false
+    storageClass: ""
+    mountPath: /data
+    accessModes:
+      - ReadWriteOnce
+    size: 10Gi
+
+  server:
+    port: 8080
+
+  spring:
+    ## JDBC connection to database
+    datasourceUrl: jdbc:postgresql://sgi-postgresql:5432/db
+    ## Valid values: dev or pro
+    ## With dev, sample data will be loaded
+    liquibaseContexts: dev
+
+  ## Aditional Enviroment Variables (See Spring Boot Documentation) for additional supported variables
+  ## Values can be provided from secrets, see https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-environment-variables
+  extraEnvVariables:
+    ## Datasource configuration
+    - name: SPRING_DATASOURCE_INITIALIZATION-MODE
+      value: ALWAYS
+    - name: SPRING_DATASOURCE_DRIVER-CLASS-NAME
+      value: org.postgresql.Driver
+    - name: SPRING_DATASOURCE_USERNAME
+      value: sgo
+    - name: SPRING_DATASOURCE_PASSWORD
+      value: sgo
+    - name: SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT
+      value: org.hibernate.dialect.PostgreSQL95Dialect
+
+  imagePullSecrets: []
+  nameOverride: ""
+  fullnameOverride: ""
+
+  serviceAccount:
+    # Specifies whether a service account should be created
+    create: false
+    # Annotations to add to the service account
+    annotations: {}
+    # The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+
+  #by default activate rollme annotation to rollout pod with every update
+  annotations:
+    enabled: true
+    podAnnotations: {}
+
+  podSecurityContext: {}
+  # fsGroup: 2000
+
+  securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+  service:
+    type: ClusterIP
+    port: 80
+
+  ingress:
+    enabled: false
+    annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    hosts:
+      - host: chart-example.local
+        paths: []
+    tls: []
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
+
+  resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+## Standalone implementation of SGE Service (Isn't available)
+sge:
+  enabled: false
+
+## Standalone implementation of SGO Service (Partially used, don't disable it)
+sgdoc:
+  enabled: true
+sgdoc-service:
+  replicaCount: 1
+
+  image:
+    # image.repository is required
+    repository: sgi/external/sgdoc-service
+    pullPolicy: IfNotPresent
+    # image.tag is required
+    tag: latest
+
+  # Database configuration
+  database:
+    # wether to create a database to have side by side with container
+    # in the same pod (sidecar)
+    use_sidecar: true
+    # persistence of the sidecar when used
+    persistence:
+      enabled: false
+      storageClass: ""
+      accessModes:
+        - ReadWriteOnce
+      size: 1Gi
+  # Service persistence configuration, when needed
+  persistence:
+    enabled: false
+    storageClass: ""
+    mountPath: /data
+    accessModes:
+      - ReadWriteOnce
+    size: 10Gi
+
+  server:
+    port: 8080
+
+  spring:
+    ## JDBC connection to database
+    datasourceUrl: jdbc:postgresql://sgi-postgresql:5432/db
+    ## Valid values: dev or pro
+    ## With dev, sample data will be loaded
+    liquibaseContexts: dev
+
+  ## Aditional Enviroment Variables (See Spring Boot Documentation) for additional supported variables
+  ## Values can be provided from secrets, see https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-environment-variables
+  extraEnvVariables:
+    ## Datasource configuration
+    - name: SPRING_DATASOURCE_INITIALIZATION-MODE
+      value: ALWAYS
+    - name: SPRING_DATASOURCE_DRIVER-CLASS-NAME
+      value: org.postgresql.Driver
+    - name: SPRING_DATASOURCE_USERNAME
+      value: sgo
+    - name: SPRING_DATASOURCE_PASSWORD
+      value: sgo
+    - name: SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT
+      value: org.hibernate.dialect.PostgreSQL95Dialect
+
+  imagePullSecrets: []
+  nameOverride: ""
+  fullnameOverride: ""
+
+  serviceAccount:
+    # Specifies whether a service account should be created
+    create: false
+    # Annotations to add to the service account
+    annotations: {}
+    # The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+
+  #by default activate rollme annotation to rollout pod with every update
+  annotations:
+    enabled: true
+    podAnnotations: {}
+
+  podSecurityContext: {}
+  # fsGroup: 2000
+
+  securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+  service:
+    type: ClusterIP
+    port: 80
+
+  ingress:
+    enabled: false
+    annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    hosts:
+      - host: chart-example.local
+        paths: []
+    tls: []
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
+
+  resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+## Auxiliar postgresql deployment. Use binami chart version 10.16.2
+## To see all available options, helm show values bitnami/postgresql --version 10.16.2
+postgresql:
+  # wether to create or not an external persistent database
+  enabled: false
+
+  # image version to use
+  image:
+    tag: 12
+
+  # database name and access
+  auth:
+    database: db
+    postgresPassword: admin
+
+  # Override postgresql.conf configuration
+  primary:
+    extendedConfiguration: { "maxConnections": "1024" }
+    # persistence options
+    persistence:
+      enable: false
+      storageClass: ""
+
+  # this fixes issues with permissions in volume
+  volumePermissions:
+    enabled: true

@@ -1,0 +1,94 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "sgi-service.fullname" . }}
+  labels:
+    {{- include "sgi-service.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "sgi-service.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- if .Values.annotations.enabled }}
+      annotations:
+        rollme: {{ randAlphaNum 5 | quote }}
+        {{- with .Values.annotations.podAnnotations }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- end }}
+      labels:
+        {{- include "sgi-service.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "sgi-service.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        {{- if .Values.database.use_sidecar }}
+        # sidecar can also be improved
+        - name: postgres-container
+          image: postgres:12
+          env:
+          - name: POSTGRES_USER
+            value: postgres
+          - name: POSTGRES_PASSWORD
+            value: admin
+          - name: POSTGRES_DB
+            value: db
+          ports:
+            - containerPort: 5432
+        {{- end }}
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ required "An image.repository value must be specified" .Values.image.repository }}:{{ required "An image.tag value must be specified" .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          # need to streamline this
+          env:
+          - name: SERVER_PORT
+            value: {{ .Values.server.port | quote }}
+          - name: SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK-SET-URI
+            value: {{ .Values.spring.securityOauth2ResourceserverJwtJwkSetUri | quote }}
+          - name: SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_ISSUER-URI
+            value: {{ .Values.spring.securityOauth2ClientProviderKeycloackIssuerUri | quote }}
+          - name: SPRING_DATASOURCE_URL
+            value: {{ .Values.spring.datasourceUrl | quote }}
+          - name: SPRING_LIQUIBASE_CONTEXTS
+            value: {{ .Values.spring.liquibaseContexts | quote }}
+          {{- if .Values.extraEnvVariables }}
+            {{- toYaml .Values.extraEnvVariables | nindent 10 }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.server.port }}
+              protocol: TCP
+          # commented out until clarified
+          # livenessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: http
+          # readinessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

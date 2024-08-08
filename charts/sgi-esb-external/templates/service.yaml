@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "sgi-esb-external.fullname" . }}
+  labels:
+    {{- include "sgi-esb-external.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: {{ .Values.server.port }}
+      protocol: TCP
+  selector:
+    {{- include "sgi-esb-external.selectorLabels" . | nindent 4 }}
