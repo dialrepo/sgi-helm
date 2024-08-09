@@ -2257,7 +2257,7 @@ sgdoc-service:
 ## To see all available options, helm show values bitnami/postgresql --version 10.16.2
 postgresql:
   # wether to create or not an external persistent database
-  enabled: false
+  enabled: true
 
   # image version to use
   image:
@@ -2270,11 +2270,30 @@ postgresql:
 
   # Override postgresql.conf configuration
   primary:
-    extendedConfiguration: { "maxConnections": "1024" }
+    extendedConfiguration: |
+      max_connections = 1024
+    
     # persistence options
     persistence:
       enable: false
       storageClass: ""
+    initdb:
+      scripts:
+        00_init.sql: |
+          create user auth with password 'auth'; grant create on database db to auth;
+          create user usr with password 'usr'; grant create on database db to usr;
+          create user eer with password 'eer'; grant create on database db to eer;
+          create user eti with password 'eti'; grant create on database db to eti;
+          create user csp with password 'csp'; grant create on database db to csp;
+          create user pii with password 'pii'; grant create on database db to pii;
+          create user rel with password 'rel'; grant create on database db to rel;
+          create user tp with password 'tp'; grant create on database db to tp;
+          create user rep with password 'rep'; grant create on database db to rep;
+          create user com with password 'com'; grant create on database db to com;
+          create user cnf with password 'cnf'; grant create on database db to cnf;
+          create user prc with password 'prc'; grant create on database db to prc;
+          create user sgo with password 'sgo'; grant create on database db to sgo;
+          create schema authorization auth;
 
   # this fixes issues with permissions in volume
   volumePermissions:

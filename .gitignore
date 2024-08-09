@@ -1,0 +1,10 @@
+# do not commit vscode local config
+.vscode/*
+.devcontainer/*
+.kube/*
+.ssh/*
+.helm/*
+
+# do not commit compressed charts or locks
+**/*.tgz
+**/*Chart.lock

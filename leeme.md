@@ -3,6 +3,8 @@
 ```sh
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/cloud/deploy.yaml
 ```
+ kubectl delete -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/cloud/deploy.yaml
+
 
 #no teníamos registrado la implementación nginx para los ingress
 #esto es para que nos de la ip pública
@@ -15,6 +17,10 @@ helm package  ./charts/sgi-umbrella/
 helm upgrade sgi sgi-umbrella-0.1.46.tgz --install --namespace sgi-demo -f ./config/values.demo.yaml
 ```
 
+### prueba loadbalancer
+```sh
+kubectl apply -f loadbalancer.yaml
+``` 
 
 
 
