@@ -8,3 +8,5 @@
 # do not commit compressed charts or locks
 **/*.tgz
 **/*Chart.lock
+
+comandos.md
