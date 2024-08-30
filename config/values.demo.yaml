@@ -19,7 +19,7 @@ sgi-webapp:
     spec:
       ingressClassName: nginx
     hosts:
-      - host: demo-2.hercules-sgi.local
+      - host: demo.hercules-sgi.local
         paths:
           - path: /
 
@@ -66,7 +66,7 @@ sgi-usr-service:
       kubernetes.io/ingress.class: nginx
       nginx.ingress.kubernetes.io/rewrite-target: /$2
     hosts:
-      - host: demo-2.hercules-sgi.local
+      - host: demo.hercules-sgi.local
         paths:
           - path: /api/usr(/|$)(.*)
 
@@ -113,7 +113,7 @@ sgi-eer-service:
       kubernetes.io/ingress.class: nginx
       nginx.ingress.kubernetes.io/rewrite-target: /$2
     hosts:
-      - host: demo-2.hercules-sgi.local
+      - host: demo.hercules-sgi.local
         paths:
           - path: /api/eer(/|$)(.*)
 
@@ -159,7 +159,7 @@ sgi-eti-service:
       value: "http://sgi-sgi-cnf-service"
     ## external webapp accesible base url
     - name: SGI_WEB-URL
-      value: "http://demo-2.hercules-sgi.local"
+      value: "http://demo.hercules-sgi.local"
     ## Blockchain API base url
     - name: SGI_BLOCKCHAIN_URL
       value: "http://blockchain.local"
@@ -185,7 +185,7 @@ sgi-eti-service:
       kubernetes.io/ingress.class: nginx
       nginx.ingress.kubernetes.io/rewrite-target: /$2
     hosts:
-      - host: demo-2.hercules-sgi.local
+      - host: demo.hercules-sgi.local
         paths:
           - path: /api/eti(/|$)(.*)
 
@@ -239,7 +239,7 @@ sgi-csp-service:
       value: "http://sgi-sgi-esb/sgemp"
     ## external webapp accesible base url
     - name: SGI_WEB-URL
-      value: "http://demo-2.hercules-sgi.local"
+      value: "http://demo.hercules-sgi.local"
     ## Datasource configuration
     - name: SPRING_DATASOURCE_INITIALIZATION-MODE
       value: ALWAYS
@@ -259,7 +259,7 @@ sgi-csp-service:
       kubernetes.io/ingress.class: nginx
       nginx.ingress.kubernetes.io/rewrite-target: /$2
     hosts:
-      - host: demo-2.hercules-sgi.local
+      - host: demo.hercules-sgi.local
         paths:
           - path: /api/csp(/|$)(.*)
 
@@ -315,7 +315,7 @@ sgi-pii-service:
       kubernetes.io/ingress.class: nginx
       nginx.ingress.kubernetes.io/rewrite-target: /$2
     hosts:
-      - host: demo-2.hercules-sgi.local
+      - host: demo.hercules-sgi.local
         paths:
           - path: /api/pii(/|$)(.*)
 
@@ -361,7 +361,7 @@ sgi-rel-service:
       kubernetes.io/ingress.class: nginx
       nginx.ingress.kubernetes.io/rewrite-target: /$2
     hosts:
-      - host: demo-2.hercules-sgi.local
+      - host: demo.hercules-sgi.local
         paths:
           - path: /api/rel(/|$)(.*)
 
@@ -434,7 +434,7 @@ sgi-tp-service:
       kubernetes.io/ingress.class: nginx
       nginx.ingress.kubernetes.io/rewrite-target: /$2
     hosts:
-      - host: demo-2.hercules-sgi.local
+      - host: demo.hercules-sgi.local
         paths:
           - path: /api/tp(/|$)(.*)
 
@@ -514,7 +514,7 @@ sgi-rep-service:
       kubernetes.io/ingress.class: nginx
       nginx.ingress.kubernetes.io/rewrite-target: /$2
     hosts:
-      - host: demo-2.hercules-sgi.local
+      - host: demo.hercules-sgi.local
         paths:
           - path: /api/rep(/|$)(.*)
 
@@ -606,7 +606,7 @@ sgi-com-service:
       kubernetes.io/ingress.class: nginx
       nginx.ingress.kubernetes.io/rewrite-target: /$2
     hosts:
-      - host: demo-2.hercules-sgi.local
+      - host: demo.hercules-sgi.local
         paths:
           - path: /api/com(/|$)(.*)
 
@@ -656,7 +656,7 @@ sgi-cnf-service:
       nginx.ingress.kubernetes.io/rewrite-target: /$2
       nginx.ingress.kubernetes.io/proxy-body-size: "10m" #Default size is 1M
     hosts:
-      - host: demo-2.hercules-sgi.local
+      - host: demo.hercules-sgi.local
         paths:
           - path: /api/cnf(/|$)(.*)
 
@@ -733,7 +733,7 @@ sgi-prc-service:
       kubernetes.io/ingress.class: nginx
       nginx.ingress.kubernetes.io/rewrite-target: /$2
     hosts:
-      - host: demo-2.hercules-sgi.local
+      - host: demo.hercules-sgi.local
         paths:
           - path: /api/prc(/|$)(.*)
 
@@ -792,7 +792,7 @@ sgi-keycloak:
     annotations:
       kubernetes.io/ingress.class: nginx
     hosts:
-      - host: demo-2.hercules-sgi.local
+      - host: demo.hercules-sgi.local
         paths:
           - path: /auth
 
@@ -893,7 +893,7 @@ sgi-esb:
       nginx.ingress.kubernetes.io/proxy-body-size: "10m" #Default size is 1M, needed for sgdoc
       nginx.ingress.kubernetes.io/proxy-read-timeout: "180" #Default timeout 60s, needed for sge slow endpoints
     hosts:
-      - host: demo-2.hercules-sgi.local
+      - host: demo.hercules-sgi.local
         paths:
           - path: /api(/.*)
 
