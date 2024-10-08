@@ -31,6 +31,12 @@ kubectl port-forward svc/argocd-server -n argocd 8080:443
 ```
 
 * la constraseña que está en un secret de kubernetes
+* La contraseña inicial de la admincuenta se genera automáticamente y se almacena como texto sin formato en el campo passwordde un secreto nombrado argocd-initial-admin-secret en el espacio de nombres de instalación de Argo CD. Puede recuperar esta contraseña simplemente usando la argocdCLI:
+
+```sh
+argocd admin initial-password -n argocd
+```
+
 * y ahora si ejecuto algo en argocd se ejecuta contra el servidor de argo.
 ```sh
 argocd login localhost:8080 --username admin --password $(kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath="{.data.password}" | base64 -d; echo)
@@ -41,7 +47,7 @@ argocd login localhost:8080 --username admin --password $(kubectl get secret arg
 argocd repo add --name bitnami https://charts.bitnami.com/bitnami --type helm
 ```
 
-* argocd creamos una aplicación, el equivalente al upgrade de helm, es como un registro, la aplicación sgi, el repo de hel es --repo, el path es umbrela, el servidor donde lo quiero desplegar de minikube, el namespace de sgi-demo y el values desdesde el path del umbrella que es desde donde está el values del umbrella.
+* argocd creamos una aplicación, el equivalente al upgrade de helm, es como un registro, la aplicación sgi, el repo de helm es --repo, el path es umbrela, el servidor donde lo quiero desplegar de minikube, el namespace de sgi-demo y el values desde el path del umbrella que es desde donde está el values del umbrella.
 
 ```sh
 argocd app create sgi --repo https://github.com/didiez/hercules-sgi-helm --path charts/sgi-umbrella --dest-server https://kubernetes.default.svc --dest-namespace sgi-demo --values ../../config/values.demo.yaml
